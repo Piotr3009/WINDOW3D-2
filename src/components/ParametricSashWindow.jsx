@@ -879,11 +879,8 @@ function ExternalBoxElement({ height, side = 'right', position }) {
   }), []);
 
   return (
-    // rotation PI/2 wokol Y: ekstruzja (lok.Z=17mm) → world +X (grubosc na zewnatrz)
-    //                         profil X (100mm) → world -Z (w glebia boxa)
     <group
       position={position}
-      rotation={[0, Math.PI / 2, 0]}
       scale={[side === 'left' ? -1 : 1, 1, 1]}
     >
       <mesh geometry={geometry} castShadow receiveShadow>
