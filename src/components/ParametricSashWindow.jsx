@@ -841,21 +841,22 @@ function JambWithPartingBead({
 }
 
 function ExternalBoxElement({ height, side = 'right', position, material }) {
+  // Shape w lokalnym XY:
+  //   X = kierunek glebokosci: 0=exterior(front), 100mm=interior
+  //   Y = wysokosc: 0=dol, height=gora
+  // Wyciecie: X=80..100mm (20mm od interior), Y=0..80mm, R20 w gornym narozn.
+  // Ekstruzja 17mm w kierunku lokalnym Z → po rotateY(-PI/2) staje sie world +X
+  // Po rotateY(-PI/2): local+X → world-Z, local+Z → world+X
   const geometry = useMemo(() => {
-    const h = height;
-
-    // Profil w plaszczyznie X-Y (widziany z boku okna)
-    // X = glebokosc (0..100mm, front=0, interior=100)
-    // Y = wysokosc (0..h)
-    // Wyciecie dolno-wewnetrzne: 20mm szerokie (X=80..100), 80mm wysokie (Y=0..80), R20 w narozn.
     const shape = new THREE.Shape();
-    shape.moveTo(0, 0);
-    shape.lineTo(0, h);
-    shape.lineTo(mm(100), h);
-    shape.lineTo(mm(100), mm(80));
-    // R20: srodek (80,80), od kata 0 do -PI/2 (zgodnie z ruchem wskazowek)
-    shape.absarc(mm(80), mm(80), mm(20), 0, -Math.PI / 2, true);
-    shape.lineTo(mm(80), 0);
+    shape.moveTo(0, 0);                    // exterior bottom
+    shape.lineTo(0, height);              // exterior top
+    shape.lineTo(mm(100), height);        // interior top
+    shape.lineTo(mm(100), mm(80));        // interior wall down to cutout start
+    // Fillet R20: srodek (mm(100), mm(60)), od PI/2 do PI, CCW
+    shape.absarc(mm(100), mm(60), mm(20), Math.PI / 2, Math.PI, false);
+    // Jestesmy w (mm(80), mm(60))
+    shape.lineTo(mm(80), 0);              // wzdluz Z=80 do dolu
     shape.closePath();
 
     const g = new THREE.ExtrudeGeometry(shape, {
@@ -865,8 +866,7 @@ function ExternalBoxElement({ height, side = 'right', position, material }) {
       curveSegments: 24,
     });
 
-    // Obracamy tak zeby ekstruzja (Z) stala sie X (grubosc elementu)
-    g.rotateY(Math.PI / 2);
+    g.rotateY(-Math.PI / 2);
     g.computeVertexNormals();
     return g;
   }, [height]);
@@ -885,6 +885,9 @@ function ExternalBoxElement({ height, side = 'right', position, material }) {
 }
 
 function TraditionalSill({ width, position, material }) {
+  const sillExtension = 52; // mm z kazdej strony
+  const totalWidth = width + sillExtension * 2;
+
   const geometry = useMemo(() => {
     const shape = new THREE.Shape();
 
@@ -910,18 +913,18 @@ function TraditionalSill({ width, position, material }) {
     shape.closePath();
 
     const g = new THREE.ExtrudeGeometry(shape, {
-      depth: mm(width),
+      depth: mm(totalWidth),
       bevelEnabled: false,
       steps: 1,
     });
 
     g.rotateY(Math.PI / 2);
     g.scale(1, -1, 1);
-    g.translate(mm(-width / 2), mm(29.207), mm(164 / 2));
+    g.translate(mm(-totalWidth / 2), mm(29.207), mm(164 / 2));
     g.computeVertexNormals();
 
     return g;
-  }, [width]);
+  }, [totalWidth]);
 
   return (
     <mesh geometry={geometry} position={position} castShadow receiveShadow>
@@ -1108,13 +1111,13 @@ export default function ParametricSashWindow({
       <ExternalBoxElement
         height={h}
         side="right"
-        position={[w / 2, (sillVisibleHeight - jambEmbedIntoSill) - h / 2, bd / 2]}
+        position={[w / 2, jambOriginY - h / 2, bd / 2 + mm(52)]}
         material={jambMaterial}
       />
       <ExternalBoxElement
         height={h}
         side="left"
-        position={[-w / 2, (sillVisibleHeight - jambEmbedIntoSill) - h / 2, bd / 2]}
+        position={[-w / 2, jambOriginY - h / 2, bd / 2 + mm(52)]}
         material={jambMaterial}
       />
 
