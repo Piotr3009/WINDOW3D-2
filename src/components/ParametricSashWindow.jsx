@@ -841,22 +841,14 @@ function JambWithPartingBead({
 }
 
 function ExternalBoxElement({ height, side = 'right', position, material }) {
-  // Shape w lokalnym XY:
-  //   X = kierunek glebokosci: 0=exterior(front), 100mm=interior
-  //   Y = wysokosc: 0=dol, height=gora
-  // Wyciecie: X=80..100mm (20mm od interior), Y=0..80mm, R20 w gornym narozn.
-  // Ekstruzja 17mm w kierunku lokalnym Z → po rotateY(-PI/2) staje sie world +X
-  // Po rotateY(-PI/2): local+X → world-Z, local+Z → world+X
   const geometry = useMemo(() => {
     const shape = new THREE.Shape();
-    shape.moveTo(0, 0);                    // exterior bottom
-    shape.lineTo(0, height);              // exterior top
-    shape.lineTo(mm(100), height);        // interior top
-    shape.lineTo(mm(100), mm(80));        // interior wall down to cutout start
-    // Fillet R20: srodek (mm(100), mm(60)), od PI/2 do PI, CCW
+    shape.moveTo(0, 0);
+    shape.lineTo(0, height);
+    shape.lineTo(mm(100), height);
+    shape.lineTo(mm(100), mm(80));
     shape.absarc(mm(100), mm(60), mm(20), Math.PI / 2, Math.PI, false);
-    // Jestesmy w (mm(80), mm(60))
-    shape.lineTo(mm(80), 0);              // wzdluz Z=80 do dolu
+    shape.lineTo(mm(80), 0);
     shape.closePath();
 
     const g = new THREE.ExtrudeGeometry(shape, {
@@ -872,15 +864,13 @@ function ExternalBoxElement({ height, side = 'right', position, material }) {
   }, [height]);
 
   return (
-    <mesh
-      geometry={geometry}
-      position={position}
-      scale={[side === 'left' ? -1 : 1, 1, 1]}
-      castShadow
-      receiveShadow
-    >
-      <primitive object={material} attach="material" />
-    </mesh>
+    <group position={position} scale={[side === 'left' ? -1 : 1, 1, 1]} rotation={[0, Math.PI / 2, 0]}>
+      <mesh geometry={geometry} castShadow receiveShadow>
+        <primitive object={material} attach="material" />
+      </mesh>
+      {/* Osie orientacji — X=czerwony, Y=zielony, Z=niebieski */}
+      <AxesGizmo origin={[0, 0, 0]} size={120} />
+    </group>
   );
 }
 
