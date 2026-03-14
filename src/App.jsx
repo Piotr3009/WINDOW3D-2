@@ -113,6 +113,7 @@ export default function App() {
   const [autoRotate, setAutoRotate] = useState(false);
   const [showGuides, setShowGuides] = useState(true);
   const [boxType, setBoxType] = useState('standard');
+  const [pulleyDemoTravel, setPulleyDemoTravel] = useState(0);
 
   const maxSashOpening = Math.max(0, height / 2 - 120);
 
@@ -127,8 +128,9 @@ export default function App() {
       boxDepth: boxType === 'standard' ? 164 : 146,
       sashDepth: 57,
       boxType,
+      pulleyDemoTravel,
     }),
-    [width, height, opening, upperOpening, autoRotate, showGuides, boxType],
+    [width, height, opening, upperOpening, autoRotate, showGuides, boxType, pulleyDemoTravel],
   );
 
   return (
@@ -178,6 +180,18 @@ export default function App() {
           </div>
           <Toggle label="Auto rotate" checked={autoRotate} onChange={setAutoRotate} />
           <Toggle label="Show guide dimensions" checked={showGuides} onChange={setShowGuides} />
+        </div>
+
+        <div className="card">
+          <h2>Pulley demo</h2>
+          <Slider
+            label="Pulley travel"
+            value={pulleyDemoTravel}
+            min={0}
+            max={400}
+            step={5}
+            onChange={setPulleyDemoTravel}
+          />
         </div>
 
         <div className="card note">
