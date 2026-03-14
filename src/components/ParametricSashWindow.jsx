@@ -658,6 +658,7 @@ function PulleySet({
   showAxes = true,
   plateOffsetX = mm(-10),
   mirrorX = false,
+  weightStartY = -mm(646),
 }) {
   const pulleyCordRadius = mm(18.8);
   const pulleyTravel = mm(travel);
@@ -707,7 +708,7 @@ function PulleySet({
 
       <CordPreview points={cordPoints} stripeOffset={stripeOffset} />
 
-      <WeightPreview position={[pulleyCordRadius, -mm(646) + pulleyTravel, 0]} size={45} height={180} />
+      <WeightPreview position={[pulleyCordRadius, weightStartY + pulleyTravel, 0]} size={45} height={180} />
     </group>
   );
 }
@@ -728,6 +729,7 @@ function JambWithPartingBead({
   pulleyMaterial = null,
   pulleyUpperTravel = 0,
   pulleyLowerTravel = 0,
+  weightStartY = -mm(646),
 }) {
   const jambDepth = mm(130);
   const jambThickness = mm(28);
@@ -809,6 +811,7 @@ function JambWithPartingBead({
             showAxes={false}
             plateOffsetX={mm(-10)}
             mirrorX={pulleyMirrorX}
+            weightStartY={weightStartY}
           />
           <PulleySet
             x={pulleyLocalX}
@@ -820,6 +823,7 @@ function JambWithPartingBead({
             showAxes={false}
             plateOffsetX={mm(-10)}
             mirrorX={pulleyMirrorX}
+            weightStartY={weightStartY}
           />
         </>
       )}
@@ -1000,6 +1004,12 @@ export default function ParametricSashWindow({
   const upperPulleyTravel = upperOpeningDrop;
   const lowerPulleyTravel = -lowerOpeningLift;
 
+  // Pozycja ciężarka w lokalnym układzie PulleySet - na wysokości meeting rail
+  const jambOriginY = sillVisibleHeight - jambEmbedIntoSill;
+  const meetingY_inJamb = meetingY - jambOriginY;
+  const pulleyLocalY_calc = h / 2 - mm(100) - mm(64); // mm(64) = mm(128/2)
+  const weightStartY = meetingY_inJamb - pulleyLocalY_calc;
+
   return (
     <group>
       <JambWithPartingBead
@@ -1016,6 +1026,7 @@ export default function ParametricSashWindow({
         pulleyMaterial={pulleyPlateMaterial}
         pulleyUpperTravel={upperPulleyTravel}
         pulleyLowerTravel={lowerPulleyTravel}
+        weightStartY={weightStartY}
       />
 
       <JambWithPartingBead
@@ -1032,6 +1043,7 @@ export default function ParametricSashWindow({
         pulleyMaterial={pulleyPlateMaterial}
         pulleyUpperTravel={upperPulleyTravel}
         pulleyLowerTravel={lowerPulleyTravel}
+        weightStartY={weightStartY}
       />
 
       <JambWithPartingBead
