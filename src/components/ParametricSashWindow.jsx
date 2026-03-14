@@ -840,15 +840,23 @@ function JambWithPartingBead({
   );
 }
 
-function ExternalBoxElement({ height, side = 'right', position, material }) {
+function ExternalBoxElement({ height, side = 'right', position }) {
+  // Profil w lokalnym XY:
+  //   X = glebokosc: 0=exterior(front), 100mm=interior
+  //   Y = wysokosc:  0=dol, height=gora
+  // Wyciecie dolno-interior: X=80..100 (20mm), Y=0..80 (80mm), R20 w narozn (80,80)
+  // Ekstruzja 17mm wzdluz lokalnego Z
+  // Group rotation PI/2 wokol Y: lokalne Z → world +X (grubosc 17mm idzie na boki)
+  //                               lokalne X → world -Z (100mm idzie w glebia)
   const geometry = useMemo(() => {
     const shape = new THREE.Shape();
-    shape.moveTo(0, 0);
-    shape.lineTo(0, height);
-    shape.lineTo(mm(100), height);
-    shape.lineTo(mm(100), mm(80));
-    shape.absarc(mm(100), mm(60), mm(20), Math.PI / 2, Math.PI, false);
-    shape.lineTo(mm(80), 0);
+    shape.moveTo(0, 0);              // exterior bottom
+    shape.lineTo(0, height);         // exterior top
+    shape.lineTo(mm(100), height);   // interior top
+    shape.lineTo(mm(100), mm(80));   // notch start on interior face
+    // R20 w narozn (80,80): od kata 0 (punkt 100,80) do -PI/2 (punkt 80,60), CW
+    shape.absarc(mm(80), mm(80), mm(20), 0, -Math.PI / 2, true);
+    shape.lineTo(mm(80), 0);         // notch inner wall to bottom
     shape.closePath();
 
     const g = new THREE.ExtrudeGeometry(shape, {
@@ -858,17 +866,30 @@ function ExternalBoxElement({ height, side = 'right', position, material }) {
       curveSegments: 24,
     });
 
-    g.rotateY(-Math.PI / 2);
     g.computeVertexNormals();
     return g;
   }, [height]);
 
+  const extMaterial = useMemo(() => new THREE.MeshPhysicalMaterial({
+    color: '#c8a96e',
+    roughness: 0.5,
+    metalness: 0.0,
+    clearcoat: 0.2,
+    clearcoatRoughness: 0.12,
+  }), []);
+
   return (
-    <group position={position} scale={[side === 'left' ? -1 : 1, 1, 1]} rotation={[0, Math.PI / 2, 0]}>
+    // rotation PI/2 wokol Y: ekstruzja (lok.Z=17mm) → world +X (grubosc na zewnatrz)
+    //                         profil X (100mm) → world -Z (w glebia boxa)
+    <group
+      position={position}
+      rotation={[0, Math.PI / 2, 0]}
+      scale={[side === 'left' ? -1 : 1, 1, 1]}
+    >
       <mesh geometry={geometry} castShadow receiveShadow>
-        <primitive object={material} attach="material" />
+        <primitive object={extMaterial} attach="material" />
       </mesh>
-      {/* Osie orientacji — X=czerwony, Y=zielony, Z=niebieski */}
+      {/* Osie: X=czerwony, Y=zielony, Z=niebieski */}
       <AxesGizmo origin={[0, 0, 0]} size={120} />
     </group>
   );
@@ -1101,14 +1122,12 @@ export default function ParametricSashWindow({
       <ExternalBoxElement
         height={h}
         side="right"
-        position={[w / 2, jambOriginY - h / 2, bd / 2 + mm(52)]}
-        material={jambMaterial}
+        position={[w / 2, jambOriginY - h / 2, bd / 2]}
       />
       <ExternalBoxElement
         height={h}
         side="left"
-        position={[-w / 2, jambOriginY - h / 2, bd / 2 + mm(52)]}
-        material={jambMaterial}
+        position={[-w / 2, jambOriginY - h / 2, bd / 2]}
       />
 
       <Sash
