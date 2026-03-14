@@ -677,7 +677,7 @@ function PulleySet({
   return (
     <group position={[x, y, z]} scale={[mirrorX ? -1 : 1, 1, 1]}>
       <PulleyPlatePreview
-        position={[plateOffsetX, 0, 0]}
+        position={[plateOffsetX - mm(0.25), 0, 0]}
         width={25}
         height={128}
         thickness={3}
@@ -876,6 +876,9 @@ function ExternalBoxElement({ height, side = 'right', position }) {
     metalness: 0.0,
     clearcoat: 0.2,
     clearcoatRoughness: 0.12,
+    polygonOffset: true,
+    polygonOffsetFactor: -2,
+    polygonOffsetUnits: -2,
   }), []);
 
   return (
@@ -996,6 +999,9 @@ export default function ParametricSashWindow({
         metalness: 0.82,
         clearcoat: 0.18,
         clearcoatRoughness: 0.14,
+        polygonOffset: true,
+        polygonOffsetFactor: -2,
+        polygonOffsetUnits: -2,
       }),
     []
   );
@@ -1117,14 +1123,14 @@ export default function ParametricSashWindow({
       />
 
       <ExternalBoxElement
-        height={h}
+        height={h + mm(52)}
         side="right"
-        position={[w / 2 - mm(100) + mm(52), jambOriginY - h / 2 - mm(32) + mm(0.25), bd / 2 - mm(17)]}
+        position={[w / 2 - mm(100) + mm(52), jambOriginY - h / 2, bd / 2 - mm(17)]}
       />
       <ExternalBoxElement
-        height={h}
+        height={h + mm(52)}
         side="left"
-        position={[-w / 2 + mm(100) - mm(52), jambOriginY - h / 2 - mm(32) + mm(0.25), bd / 2 - mm(17)]}
+        position={[-w / 2 + mm(100) - mm(52), jambOriginY - h / 2, bd / 2 - mm(17)]}
       />
 
       <Sash
