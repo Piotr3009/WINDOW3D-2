@@ -63,7 +63,7 @@ function Scene({ config }) {
       <directionalLight position={[-4, 3, -3]} intensity={0.45} />
 
       <group position={[0, 0.18, 0]}>
-        <Bounds fit clip observe margin={1.2}>
+        <Bounds fit margin={1.2}>
           <group onPointerOver={() => setHovered(true)} onPointerOut={() => setHovered(false)}>
             <ParametricSashWindow {...config} />
           </group>
