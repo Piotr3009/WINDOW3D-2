@@ -726,7 +726,8 @@ function JambWithPartingBead({
   pulleyCutoutYFromTop = 100,
   pulleyCutoutZCenter = 8.5,
   pulleyMaterial = null,
-  pulleyTravel = 0,
+  pulleyUpperTravel = 0,
+  pulleyLowerTravel = 0,
 }) {
   const jambDepth = mm(130);
   const jambThickness = mm(28);
@@ -802,7 +803,7 @@ function JambWithPartingBead({
             x={pulleyLocalX}
             y={pulleyLocalY}
             z={mm(pulleyCutoutZCenter)}
-            travel={pulleyTravel}
+            travel={pulleyUpperTravel}
             material={pulleyMaterial}
             showMarker={false}
             showAxes={false}
@@ -813,7 +814,7 @@ function JambWithPartingBead({
             x={pulleyLocalX}
             y={pulleyLocalY}
             z={-mm(pulleyCutoutZCenter)}
-            travel={pulleyTravel}
+            travel={pulleyLowerTravel}
             material={pulleyMaterial}
             showMarker={false}
             showAxes={false}
@@ -996,6 +997,8 @@ export default function ParametricSashWindow({
   const trackRearZ = sashCenterOffset;
 
   const pulleyCutoutZCenter = config.jambDepth / 2 - (config.jambDepth - config.partingBeadProjection) / 4;
+  const upperPulleyTravel = upperOpeningDrop;
+  const lowerPulleyTravel = -lowerOpeningLift;
 
   return (
     <group>
@@ -1011,7 +1014,8 @@ export default function ParametricSashWindow({
         pulleyCutoutYFromTop={100}
         pulleyCutoutZCenter={pulleyCutoutZCenter}
         pulleyMaterial={pulleyPlateMaterial}
-        pulleyTravel={pulleyDemoTravel}
+        pulleyUpperTravel={upperPulleyTravel}
+        pulleyLowerTravel={lowerPulleyTravel}
       />
 
       <JambWithPartingBead
@@ -1026,7 +1030,8 @@ export default function ParametricSashWindow({
         pulleyCutoutYFromTop={100}
         pulleyCutoutZCenter={pulleyCutoutZCenter}
         pulleyMaterial={pulleyPlateMaterial}
-        pulleyTravel={pulleyDemoTravel}
+        pulleyUpperTravel={upperPulleyTravel}
+        pulleyLowerTravel={lowerPulleyTravel}
       />
 
       <JambWithPartingBead
