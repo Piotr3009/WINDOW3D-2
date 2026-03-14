@@ -850,13 +850,13 @@ function ExternalBoxElement({ height, side = 'right', position }) {
   //                               lokalne X → world -Z (100mm idzie w glebia)
   const geometry = useMemo(() => {
     const shape = new THREE.Shape();
-    shape.moveTo(0, 0);              // exterior bottom
-    shape.lineTo(0, height);         // exterior top
-    shape.lineTo(mm(100), height);   // interior top
-    shape.lineTo(mm(100), mm(80));   // notch start on interior face
-    // R20 w narozn (80,80): od kata 0 (punkt 100,80) do -PI/2 (punkt 80,60), CW
-    shape.absarc(mm(80), mm(80), mm(20), 0, -Math.PI / 2, true);
-    shape.lineTo(mm(80), 0);         // notch inner wall to bottom
+    shape.moveTo(0, 0);
+    shape.lineTo(0, height);
+    shape.lineTo(mm(100), height);
+    shape.lineTo(mm(100), mm(60));
+    // Wklesly R20: centrum (80,60), CCW od kata 0 → (100,60) do PI/2 → (80,80)
+    shape.absarc(mm(80), mm(60), mm(20), 0, Math.PI / 2, false);
+    shape.lineTo(mm(80), 0);
     shape.closePath();
 
     const g = new THREE.ExtrudeGeometry(shape, {
