@@ -840,6 +840,50 @@ function JambWithPartingBead({
   );
 }
 
+function ExternalBoxElement({ height, side = 'right', position, material }) {
+  const geometry = useMemo(() => {
+    const h = height;
+
+    // Profil w plaszczyznie X-Y (widziany z boku okna)
+    // X = glebokosc (0..100mm, front=0, interior=100)
+    // Y = wysokosc (0..h)
+    // Wyciecie dolno-wewnetrzne: 20mm szerokie (X=80..100), 80mm wysokie (Y=0..80), R20 w narozn.
+    const shape = new THREE.Shape();
+    shape.moveTo(0, 0);
+    shape.lineTo(0, h);
+    shape.lineTo(mm(100), h);
+    shape.lineTo(mm(100), mm(80));
+    // R20: srodek (80,80), od kata 0 do -PI/2 (zgodnie z ruchem wskazowek)
+    shape.absarc(mm(80), mm(80), mm(20), 0, -Math.PI / 2, true);
+    shape.lineTo(mm(80), 0);
+    shape.closePath();
+
+    const g = new THREE.ExtrudeGeometry(shape, {
+      depth: mm(17),
+      bevelEnabled: false,
+      steps: 1,
+      curveSegments: 24,
+    });
+
+    // Obracamy tak zeby ekstruzja (Z) stala sie X (grubosc elementu)
+    g.rotateY(Math.PI / 2);
+    g.computeVertexNormals();
+    return g;
+  }, [height]);
+
+  return (
+    <mesh
+      geometry={geometry}
+      position={position}
+      scale={[side === 'left' ? -1 : 1, 1, 1]}
+      castShadow
+      receiveShadow
+    >
+      <primitive object={material} attach="material" />
+    </mesh>
+  );
+}
+
 function TraditionalSill({ width, position, material }) {
   const geometry = useMemo(() => {
     const shape = new THREE.Shape();
@@ -1059,6 +1103,19 @@ export default function ParametricSashWindow({
         width={width}
         position={[0, -h / 2 + sillVisibleHeight / 2, 0]}
         material={sillMaterial}
+      />
+
+      <ExternalBoxElement
+        height={h}
+        side="right"
+        position={[w / 2, (sillVisibleHeight - jambEmbedIntoSill) - h / 2, bd / 2]}
+        material={jambMaterial}
+      />
+      <ExternalBoxElement
+        height={h}
+        side="left"
+        position={[-w / 2, (sillVisibleHeight - jambEmbedIntoSill) - h / 2, bd / 2]}
+        material={jambMaterial}
       />
 
       <Sash
