@@ -4,6 +4,94 @@ import * as THREE from 'three';
 
 const mm = (value) => value / 1000;
 
+const EXT_BEAD_W = mm(15);
+const EXT_BEAD_D = mm(9);
+
+const INT_BEAD_W = mm(18);
+const INT_BEAD_D = mm(14);
+const INT_BEAD_R = mm(11);
+
+function signedArea(points) {
+  let area = 0;
+  for (let i = 0; i < points.length; i += 1) {
+    const [x1, y1] = points[i];
+    const [x2, y2] = points[(i + 1) % points.length];
+    area += x1 * y2 - x2 * y1;
+  }
+  return area / 2;
+}
+
+function shapeFromPoints(points) {
+  const ordered = signedArea(points) < 0 ? [...points].reverse() : points;
+  const shape = new THREE.Shape();
+  shape.moveTo(ordered[0][0], ordered[0][1]);
+  for (let i = 1; i < ordered.length; i += 1) {
+    shape.lineTo(ordered[i][0], ordered[i][1]);
+  }
+  shape.closePath();
+  return shape;
+}
+
+function buildCoreLocalProfile(memberSize, memberDepth) {
+  return [
+    [0, 0],
+    [memberSize - EXT_BEAD_W, 0],
+    [memberSize, EXT_BEAD_D],
+    [memberSize, memberDepth - INT_BEAD_D],
+    [memberSize - INT_BEAD_W, memberDepth - INT_BEAD_D],
+    [memberSize - INT_BEAD_W, memberDepth],
+    [0, memberDepth],
+  ];
+}
+
+function buildOvoloSolidLocalPoints(samples = 20) {
+  const points = [];
+  const topFlat = INT_BEAD_W - INT_BEAD_R; // 7 mm
+  const centerX = topFlat;
+  const centerY = INT_BEAD_D - INT_BEAD_R; // 3 mm
+
+  points.push([0, 0]);
+  points.push([0, INT_BEAD_D]);
+  points.push([topFlat, INT_BEAD_D]);
+
+  for (let i = 1; i <= samples; i += 1) {
+    const t = i / samples;
+    const angle = Math.PI / 2 - t * (Math.PI / 2);
+    points.push([
+      centerX + Math.cos(angle) * INT_BEAD_R,
+      centerY + Math.sin(angle) * INT_BEAD_R,
+    ]);
+  }
+
+  points.push([INT_BEAD_W, 0]);
+
+  return points;
+}
+
+function mapStileUVToShape(u, v, memberWidth, memberDepth, openingSide, flip) {
+  const x = openingSide === 'right'
+    ? -memberWidth / 2 + u
+    : memberWidth / 2 - u;
+
+  const z = flip
+    ? -memberDepth / 2 + v
+    : memberDepth / 2 - v;
+
+  return [x, -z];
+}
+
+function mapRailUVToShape(u, v, memberHeight, memberDepth, openingSide, flip) {
+  const y = openingSide === 'bottom'
+    ? memberHeight / 2 - u
+    : -memberHeight / 2 + u;
+
+  const z = flip
+    ? -memberDepth / 2 + v
+    : memberDepth / 2 - v;
+
+  return [-z, y];
+}
+
 function FramePiece({ size, position, material, castShadow = true }) {
   return (
     <mesh position={position} castShadow={castShadow} receiveShadow>
@@ -88,7 +176,269 @@ function DimensionGuide({ from, to, label, offset = [0, 0, 0] }) {
   );
 }
 
-function LowerBottomRail({ width, height, depth, yCenter, material }) {
+function SashStileCore({
+  width,
+  height,
+  depth,
+  openingSide = 'right',
+  flip = false,
+  position = [0, 0, 0],
+  material,
+}) {
+  const geometry = useMemo(() => {
+    const mw = mm(width);
+    const mh = mm(height);
+    const md = mm(depth);
+
+    const points = buildCoreLocalProfile(mw, md).map(([u, v]) =>
+      mapStileUVToShape(u, v, mw, md, openingSide, flip)
+    );
+
+    const shape = shapeFromPoints(points);
+
+    const g = new THREE.ExtrudeGeometry(shape, {
+      depth: mh,
+      bevelEnabled: false,
+      steps: 1,
+      curveSegments: 24,
+    });
+
+    g.rotateX(-Math.PI / 2);
+    g.translate(0, -mh / 2, 0);
+    g.computeVertexNormals();
+    return g;
+  }, [width, height, depth, openingSide, flip]);
+
+  return (
+    <mesh geometry={geometry} position={position} castShadow receiveShadow>
+      <primitive object={material} attach="material" />
+    </mesh>
+  );
+}
+
+function SashRailCore({
+  width,
+  height,
+  depth,
+  openingSide = 'bottom',
+  flip = false,
+  position = [0, 0, 0],
+  material,
+}) {
+  const geometry = useMemo(() => {
+    const ml = mm(width);
+    const mh = mm(height);
+    const md = mm(depth);
+
+    const points = buildCoreLocalProfile(mh, md).map(([u, v]) =>
+      mapRailUVToShape(u, v, mh, md, openingSide, flip)
+    );
+
+    const shape = shapeFromPoints(points);
+
+    const g = new THREE.ExtrudeGeometry(shape, {
+      depth: ml,
+      bevelEnabled: false,
+      steps: 1,
+      curveSegments: 24,
+    });
+
+    g.rotateY(Math.PI / 2);
+    g.translate(-ml / 2, 0, 0);
+    g.computeVertexNormals();
+    return g;
+  }, [width, height, depth, openingSide, flip]);
+
+  return (
+    <mesh geometry={geometry} position={position} castShadow receiveShadow>
+      <primitive object={material} attach="material" />
+    </mesh>
+  );
+}
+
+function ExternalStileBead({
+  width,
+  height,
+  depth,
+  openingSide = 'right',
+  flip = false,
+  position = [0, 0, 0],
+  material,
+}) {
+  const geometry = useMemo(() => {
+    const mw = mm(width);
+    const mh = mm(height);
+    const md = mm(depth);
+
+    const local = [
+      [mw - EXT_BEAD_W, 0],
+      [mw, 0],
+      [mw, EXT_BEAD_D],
+    ];
+
+    const points = local.map(([u, v]) =>
+      mapStileUVToShape(u, v, mw, md, openingSide, flip)
+    );
+
+    const shape = shapeFromPoints(points);
+
+    const g = new THREE.ExtrudeGeometry(shape, {
+      depth: mh,
+      bevelEnabled: false,
+      steps: 1,
+      curveSegments: 12,
+    });
+
+    g.rotateX(-Math.PI / 2);
+    g.translate(0, -mh / 2, 0);
+    g.computeVertexNormals();
+    return g;
+  }, [width, height, depth, openingSide, flip]);
+
+  return (
+    <mesh geometry={geometry} position={position} castShadow receiveShadow>
+      <primitive object={material} attach="material" />
+    </mesh>
+  );
+}
+
+function ExternalRailBead({
+  width,
+  height,
+  depth,
+  openingSide = 'bottom',
+  flip = false,
+  position = [0, 0, 0],
+  material,
+}) {
+  const geometry = useMemo(() => {
+    const ml = mm(width);
+    const mh = mm(height);
+    const md = mm(depth);
+
+    const local = [
+      [mh - EXT_BEAD_W, 0],
+      [mh, 0],
+      [mh, EXT_BEAD_D],
+    ];
+
+    const points = local.map(([u, v]) =>
+      mapRailUVToShape(u, v, mh, md, openingSide, flip)
+    );
+
+    const shape = shapeFromPoints(points);
+
+    const g = new THREE.ExtrudeGeometry(shape, {
+      depth: ml,
+      bevelEnabled: false,
+      steps: 1,
+      curveSegments: 12,
+    });
+
+    g.rotateY(Math.PI / 2);
+    g.translate(-ml / 2, 0, 0);
+    g.computeVertexNormals();
+    return g;
+  }, [width, height, depth, openingSide, flip]);
+
+  return (
+    <mesh geometry={geometry} position={position} castShadow receiveShadow>
+      <primitive object={material} attach="material" />
+    </mesh>
+  );
+}
+
+function InternalOvoloStileBead({
+  width,
+  height,
+  depth,
+  openingSide = 'right',
+  flip = false,
+  position = [0, 0, 0],
+  material,
+}) {
+  const geometry = useMemo(() => {
+    const mw = mm(width);
+    const mh = mm(height);
+    const md = mm(depth);
+
+    const local = buildOvoloSolidLocalPoints().map(([u, v]) => [
+      mw - INT_BEAD_W + u,
+      md - INT_BEAD_D + v,
+    ]);
+
+    const points = local.map(([u, v]) =>
+      mapStileUVToShape(u, v, mw, md, openingSide, flip)
+    );
+
+    const shape = shapeFromPoints(points);
+
+    const g = new THREE.ExtrudeGeometry(shape, {
+      depth: mh,
+      bevelEnabled: false,
+      steps: 1,
+      curveSegments: 28,
+    });
+
+    g.rotateX(-Math.PI / 2);
+    g.translate(0, -mh / 2, 0);
+    g.computeVertexNormals();
+    return g;
+  }, [width, height, depth, openingSide, flip]);
+
+  return (
+    <mesh geometry={geometry} position={position} castShadow receiveShadow>
+      <primitive object={material} attach="material" />
+    </mesh>
+  );
+}
+
+function InternalOvoloRailBead({
+  width,
+  height,
+  depth,
+  openingSide = 'bottom',
+  flip = false,
+  position = [0, 0, 0],
+  material,
+}) {
+  const geometry = useMemo(() => {
+    const ml = mm(width);
+    const mh = mm(height);
+    const md = mm(depth);
+
+    const local = buildOvoloSolidLocalPoints().map(([u, v]) => [
+      mh - INT_BEAD_W + u,
+      md - INT_BEAD_D + v,
+    ]);
+
+    const points = local.map(([u, v]) =>
+      mapRailUVToShape(u, v, mh, md, openingSide, flip)
+    );
+
+    const shape = shapeFromPoints(points);
+
+    const g = new THREE.ExtrudeGeometry(shape, {
+      depth: ml,
+      bevelEnabled: false,
+      steps: 1,
+      curveSegments: 28,
+    });
+
+    g.rotateY(Math.PI / 2);
+    g.translate(-ml / 2, 0, 0);
+    g.computeVertexNormals();
+    return g;
+  }, [width, height, depth, openingSide, flip]);
+
+  return (
+    <mesh geometry={geometry} position={position} castShadow receiveShadow>
+      <primitive object={material} attach="material" />
+    </mesh>
+  );
+}
+
+function BottomRailLowerProfile({ width, height, depth, material }) {
   const geometry = useMemo(() => {
     const w = mm(width);
     const h = mm(height);
@@ -96,22 +446,7 @@ function LowerBottomRail({ width, height, depth, yCenter, material }) {
     const rebateDepth = Math.min(mm(18), d * 0.32);
     const rebateRise = Math.min(mm(14), h * 0.22);
 
-    const shape = new THREE.Shape();
-    shape.moveTo(-w / 2, -h / 2);
-    shape.lineTo(w / 2, -h / 2);
-    shape.lineTo(w / 2, h / 2);
-    shape.lineTo(-w / 2, h / 2);
-    shape.closePath();
-
-    const g = new THREE.ExtrudeGeometry(shape, {
-      depth: d,
-      bevelEnabled: false,
-      steps: 1,
-    });
-
-    g.translate(0, 0, -d / 2);
-
-    const cut = new THREE.BufferGeometry();
+    const g = new THREE.BufferGeometry();
     const positions = new Float32Array([
       -w / 2, -h / 2, d / 2,
        w / 2, -h / 2, d / 2,
@@ -153,20 +488,51 @@ function LowerBottomRail({ width, height, depth, yCenter, material }) {
        w / 2, -h / 2 + rebateRise, d / 2 - rebateDepth,
        w / 2, -h / 2 + rebateRise, -d / 2,
     ]);
-    cut.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    cut.computeVertexNormals();
-
-    return { body: g, cut };
+    g.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    g.computeVertexNormals();
+    return g;
   }, [width, height, depth]);
 
   return (
+    <mesh geometry={geometry} castShadow receiveShadow>
+      <primitive object={material} attach="material" />
+    </mesh>
+  );
+}
+
+function LowerBottomRail({ width, height, depth, yCenter, material, flip = false }) {
+  return (
     <group position={[0, yCenter, 0]}>
-      <mesh geometry={geometry.body} castShadow receiveShadow>
-        <primitive object={material} attach="material" />
-      </mesh>
-      <mesh geometry={geometry.cut} castShadow receiveShadow>
-        <primitive object={material} attach="material" />
-      </mesh>
+      <SashRailCore
+        width={width}
+        height={height}
+        depth={depth}
+        openingSide="top"
+        flip={flip}
+        material={material}
+      />
+      <BottomRailLowerProfile
+        width={width}
+        height={height}
+        depth={depth}
+        material={material}
+      />
+      <ExternalRailBead
+        width={width}
+        height={height}
+        depth={depth}
+        openingSide="top"
+        flip={flip}
+        material={material}
+      />
+      <InternalOvoloRailBead
+        width={width}
+        height={height}
+        depth={depth}
+        openingSide="top"
+        flip={flip}
+        material={material}
+      />
     </group>
   );
 }
@@ -183,6 +549,7 @@ function Sash({
   color = '#f6f4ef',
   profiledBottom = false,
   glassThickness = 24,
+  flipChamfer = false,
 }) {
   const material = useMemo(
     () =>
@@ -214,18 +581,140 @@ function Sash({
   const topRailY = h / 2 - top / 2;
   const bottomRailY = -h / 2 + bottom / 2;
   const glassY = -h / 2 + bottom + clearHeight / 2;
+  const glazingLineZ = flipChamfer ? -d / 2 - mm(0.3) : d / 2 + mm(0.3);
 
   return (
     <group position={[0, yOffset, zOffset]}>
-      <FramePiece size={[stile, h, d]} position={[-w / 2 + stile / 2, 0, 0]} material={material} />
-      <FramePiece size={[stile, h, d]} position={[w / 2 - stile / 2, 0, 0]} material={material} />
-      <FramePiece size={[w, top, d]} position={[0, topRailY, 0]} material={material} />
+      {/* left stile */}
+      <SashStileCore
+        width={stileWidth}
+        height={height}
+        depth={depth}
+        openingSide="right"
+        flip={flipChamfer}
+        position={[-w / 2 + stile / 2, 0, 0]}
+        material={material}
+      />
+      <ExternalStileBead
+        width={stileWidth}
+        height={height}
+        depth={depth}
+        openingSide="right"
+        flip={flipChamfer}
+        position={[-w / 2 + stile / 2, 0, 0]}
+        material={material}
+      />
+      <InternalOvoloStileBead
+        width={stileWidth}
+        height={height}
+        depth={depth}
+        openingSide="right"
+        flip={flipChamfer}
+        position={[-w / 2 + stile / 2, 0, 0]}
+        material={material}
+      />
+
+      {/* right stile */}
+      <SashStileCore
+        width={stileWidth}
+        height={height}
+        depth={depth}
+        openingSide="left"
+        flip={flipChamfer}
+        position={[w / 2 - stile / 2, 0, 0]}
+        material={material}
+      />
+      <ExternalStileBead
+        width={stileWidth}
+        height={height}
+        depth={depth}
+        openingSide="left"
+        flip={flipChamfer}
+        position={[w / 2 - stile / 2, 0, 0]}
+        material={material}
+      />
+      <InternalOvoloStileBead
+        width={stileWidth}
+        height={height}
+        depth={depth}
+        openingSide="left"
+        flip={flipChamfer}
+        position={[w / 2 - stile / 2, 0, 0]}
+        material={material}
+      />
+
+      {/* top rail */}
+      <SashRailCore
+        width={width}
+        height={topRail}
+        depth={depth}
+        openingSide="bottom"
+        flip={flipChamfer}
+        position={[0, topRailY, 0]}
+        material={material}
+      />
+      <ExternalRailBead
+        width={width}
+        height={topRail}
+        depth={depth}
+        openingSide="bottom"
+        flip={flipChamfer}
+        position={[0, topRailY, 0]}
+        material={material}
+      />
+      <InternalOvoloRailBead
+        width={width}
+        height={topRail}
+        depth={depth}
+        openingSide="bottom"
+        flip={flipChamfer}
+        position={[0, topRailY, 0]}
+        material={material}
+      />
+
+      {/* bottom rail */}
       {profiledBottom ? (
-        <LowerBottomRail width={width} height={bottomRail} depth={depth} yCenter={bottomRailY} material={material} />
+        <LowerBottomRail
+          width={width}
+          height={bottomRail}
+          depth={depth}
+          yCenter={bottomRailY}
+          material={material}
+          flip={flipChamfer}
+        />
       ) : (
-        <FramePiece size={[w, bottom, d]} position={[0, bottomRailY, 0]} material={material} />
+        <>
+          <SashRailCore
+            width={width}
+            height={bottomRail}
+            depth={depth}
+            openingSide="top"
+            flip={flipChamfer}
+            position={[0, bottomRailY, 0]}
+            material={material}
+          />
+          <ExternalRailBead
+            width={width}
+            height={bottomRail}
+            depth={depth}
+            openingSide="top"
+            flip={flipChamfer}
+            position={[0, bottomRailY, 0]}
+            material={material}
+          />
+          <InternalOvoloRailBead
+            width={width}
+            height={bottomRail}
+            depth={depth}
+            openingSide="top"
+            flip={flipChamfer}
+            position={[0, bottomRailY, 0]}
+            material={material}
+          />
+        </>
       )}
-      <group position={[0, glassY, d / 2 + mm(0.3)]} renderOrder={10}>
+
+      <group position={[0, glassY, glazingLineZ]} renderOrder={10}>
         <Line
           points={[
             [-glazingEdgeLineWidth / 2, glazingEdgeLineHeight / 2, 0],
@@ -257,10 +746,6 @@ function RoundedPartingBead({ length, orientation = 'vertical', material }) {
       <group>
         <mesh castShadow receiveShadow position={[0, -straightProjection / 2, 0]}>
           <boxGeometry args={[length, straightProjection, beadWidth]} />
-          <primitive object={material} attach="material" />
-        </mesh>
-        <mesh castShadow receiveShadow position={[0, -straightProjection, 0]} rotation={[0, -Math.PI / 2, 0]}>
-          <cylinderGeometry args={[beadRadius, beadRadius, length, 24]} />
           <primitive object={material} attach="material" />
         </mesh>
       </group>
@@ -370,50 +855,6 @@ function JambPulleyTestCutout({
     g.computeVertexNormals();
     return g;
   }, [length, side, jambDepth, jambThickness, platePocketDepth, zCenter, yFromTop, plateHeight, wheelOpeningWidth, wheelOpeningHeight]);
-
-  const pocketHighlightGeometry = useMemo(() => {
-    const holeCenterX = side === 'left' ? -mm(zCenter) : mm(zCenter);
-    const holeCenterY = mm(length) / 2 - mm(yFromTop) - mm(plateHeight / 2);
-    const g = new THREE.ExtrudeGeometry(
-      (() => {
-        const shape = new THREE.Shape();
-        addRoundedRectPath(shape, holeCenterX, holeCenterY, mm(plateWidth), mm(plateHeight), mm(plateWidth / 2));
-        return shape;
-      })(),
-      {
-        depth: mm(platePocketDepth),
-        bevelEnabled: false,
-        steps: 1,
-        curveSegments: 32,
-      }
-    );
-    g.translate(0, 0, -mm(platePocketDepth) / 2);
-    g.rotateY(side === 'left' ? Math.PI / 2 : -Math.PI / 2);
-    g.computeVertexNormals();
-    return g;
-  }, [length, side, zCenter, yFromTop, plateWidth, plateHeight, platePocketDepth]);
-
-  const wheelHighlightGeometry = useMemo(() => {
-    const holeCenterX = side === 'left' ? -mm(zCenter) : mm(zCenter);
-    const holeCenterY = mm(length) / 2 - mm(yFromTop) - mm(plateHeight / 2);
-    const g = new THREE.ExtrudeGeometry(
-      (() => {
-        const shape = new THREE.Shape();
-        addRectPath(shape, holeCenterX, holeCenterY, mm(wheelOpeningWidth), mm(wheelOpeningHeight));
-        return shape;
-      })(),
-      {
-        depth: mm(jambThickness - platePocketDepth),
-        bevelEnabled: false,
-        steps: 1,
-        curveSegments: 16,
-      }
-    );
-    g.translate(0, 0, -mm(jambThickness - platePocketDepth) / 2);
-    g.rotateY(side === 'left' ? Math.PI / 2 : -Math.PI / 2);
-    g.computeVertexNormals();
-    return g;
-  }, [length, side, zCenter, yFromTop, plateHeight, wheelOpeningWidth, wheelOpeningHeight, jambThickness, platePocketDepth]);
 
   const frontCenterX = side === 'left'
     ? mm(jambThickness / 2 - platePocketDepth / 2)
@@ -841,18 +1282,10 @@ function JambWithPartingBead({
 }
 
 function ExternalBoxElement({ height, side = 'right', position }) {
-  // Profil w lokalnym XY:
-  //   X = glebokosc: 0=exterior(front), 100mm=interior
-  //   Y = wysokosc:  0=dol, height=gora
-  // Wyciecie dolno-interior: X=80..100 (20mm), Y=0..80 (80mm), R20 w narozn (80,80)
-  // Ekstruzja 17mm wzdluz lokalnego Z
-  // Group rotation PI/2 wokol Y: lokalne Z → world +X (grubosc 17mm idzie na boki)
-  //                               lokalne X → world -Z (100mm idzie w glebia)
   const geometry = useMemo(() => {
     const shape = new THREE.Shape();
     shape.moveTo(mm(20), 0);
     shape.lineTo(mm(20), mm(60));
-    // Wklesly R20: centrum (0,60), CCW od 0→(20,60) do PI/2→(0,80)
     shape.absarc(mm(0), mm(60), mm(20), 0, Math.PI / 2, false);
     shape.lineTo(0, height);
     shape.lineTo(mm(100), height);
@@ -889,14 +1322,137 @@ function ExternalBoxElement({ height, side = 'right', position }) {
       <mesh geometry={geometry} castShadow receiveShadow>
         <primitive object={extMaterial} attach="material" />
       </mesh>
-      {/* Osie: X=czerwony, Y=zielony, Z=niebieski */}
       <AxesGizmo origin={[0, 0, 0]} size={120} />
     </group>
   );
 }
 
+function InternalBoxElement({ height, side = 'right', position }) {
+  const geometry = useMemo(() => {
+    const shape = new THREE.Shape();
+    shape.moveTo(0, 0);
+    shape.lineTo(0, height);
+    shape.lineTo(mm(80), height);
+    shape.lineTo(mm(80), 0);
+    shape.closePath();
+
+    const g = new THREE.ExtrudeGeometry(shape, {
+      depth: mm(17),
+      bevelEnabled: false,
+      steps: 1,
+    });
+
+    g.computeVertexNormals();
+    return g;
+  }, [height]);
+
+  const intMaterial = useMemo(() => new THREE.MeshPhysicalMaterial({
+    color: '#e8c49a',
+    roughness: 0.5,
+    metalness: 0.0,
+    clearcoat: 0.2,
+    clearcoatRoughness: 0.12,
+    polygonOffset: true,
+    polygonOffsetFactor: -2,
+    polygonOffsetUnits: -2,
+  }), []);
+
+  return (
+    <group position={position} scale={[side === 'left' ? -1 : 1, 1, 1]}>
+      <mesh geometry={geometry} castShadow receiveShadow>
+        <primitive object={intMaterial} attach="material" />
+      </mesh>
+    </group>
+  );
+}
+
+function StaffBeadHorizontal({ width, position, flipZ = false }) {
+  const geometry = useMemo(() => {
+    const r = mm(8.5);
+    const bw = mm(17);
+    const bh = mm(17);
+    const shape = new THREE.Shape();
+    shape.moveTo(0, 0);
+    shape.lineTo(0, bh);
+    shape.lineTo(bw - r, bh);
+    shape.absarc(bw - r, bh / 2, r, Math.PI / 2, -Math.PI / 2, true);
+    shape.lineTo(0, 0);
+    shape.closePath();
+
+    const g = new THREE.ExtrudeGeometry(shape, {
+      depth: width,
+      bevelEnabled: false,
+      steps: 1,
+      curveSegments: 24,
+    });
+
+    g.rotateY(Math.PI / 2);
+    g.translate(-width / 2, 0, 0);
+    g.computeVertexNormals();
+    return g;
+  }, [width]);
+
+  const staffMaterial = useMemo(() => new THREE.MeshPhysicalMaterial({
+    color: '#1565c0',
+    roughness: 0.4,
+    metalness: 0.0,
+    clearcoat: 0.3,
+    clearcoatRoughness: 0.1,
+  }), []);
+
+  return (
+    <group position={position} scale={[1, 1, flipZ ? -1 : 1]}>
+      <mesh geometry={geometry} castShadow receiveShadow>
+        <primitive object={staffMaterial} attach="material" />
+      </mesh>
+    </group>
+  );
+}
+
+function StaffBead({ height, position, side = 'right' }) {
+  const geometry = useMemo(() => {
+    const r = mm(8.5);
+    const w = mm(17);
+    const h = mm(17);
+    const shape = new THREE.Shape();
+    shape.moveTo(0, 0);
+    shape.lineTo(0, h);
+    shape.lineTo(w - r, h);
+    shape.absarc(w - r, h / 2, r, Math.PI / 2, -Math.PI / 2, true);
+    shape.lineTo(0, 0);
+    shape.closePath();
+
+    const g = new THREE.ExtrudeGeometry(shape, {
+      depth: height,
+      bevelEnabled: false,
+      steps: 1,
+      curveSegments: 24,
+    });
+
+    g.rotateX(-Math.PI / 2);
+    g.computeVertexNormals();
+    return g;
+  }, [height]);
+
+  const staffMaterial = useMemo(() => new THREE.MeshPhysicalMaterial({
+    color: '#1565c0',
+    roughness: 0.4,
+    metalness: 0.0,
+    clearcoat: 0.3,
+    clearcoatRoughness: 0.1,
+  }), []);
+
+  return (
+    <group position={position} rotation={[0, Math.PI, 0]} scale={[side === 'left' ? -1 : 1, 1, 1]}>
+      <mesh geometry={geometry} castShadow receiveShadow>
+        <primitive object={staffMaterial} attach="material" />
+      </mesh>
+    </group>
+  );
+}
+
 function TraditionalSill({ width, position, material }) {
-  const sillExtension = 52; // mm z kazdej strony
+  const sillExtension = 52;
   const totalWidth = width + sillExtension * 2;
 
   const geometry = useMemo(() => {
@@ -952,12 +1508,11 @@ export default function ParametricSashWindow({
   opening = 0,
   upperOpening = 0,
   showGuides = true,
-  pulleyDemoTravel = 0,
 }) {
   const jambMaterial = useMemo(
     () =>
       new THREE.MeshPhysicalMaterial({
-        color: '#fbfaf7',
+        color: '#2e7d32',
         roughness: 0.4,
         metalness: 0.03,
         clearcoat: 0.32,
@@ -969,7 +1524,7 @@ export default function ParametricSashWindow({
   const beadMaterial = useMemo(
     () =>
       new THREE.MeshPhysicalMaterial({
-        color: '#f2eee7',
+        color: '#e65100',
         roughness: 0.5,
         metalness: 0.02,
         clearcoat: 0.18,
@@ -1065,10 +1620,9 @@ export default function ParametricSashWindow({
   const upperPulleyTravel = upperOpeningDrop;
   const lowerPulleyTravel = -lowerOpeningLift;
 
-  // Pozycja ciężarka w lokalnym układzie PulleySet - na wysokości meeting rail
   const jambOriginY = sillVisibleHeight - jambEmbedIntoSill;
   const meetingY_inJamb = meetingY - jambOriginY;
-  const pulleyLocalY_calc = h / 2 - mm(100) - mm(64); // mm(64) = mm(128/2)
+  const pulleyLocalY_calc = h / 2 - mm(100) - mm(64);
   const weightStartY = meetingY_inJamb - pulleyLocalY_calc;
 
   return (
@@ -1108,7 +1662,7 @@ export default function ParametricSashWindow({
       />
 
       <JambWithPartingBead
-        length={w - jambThickness * 2}
+        length={w + mm(104)}
         position={[0, h / 2 - jambThickness / 2 + sillVisibleHeight - jambEmbedIntoSill, 0]}
         material={jambMaterial}
         beadMaterial={beadMaterial}
@@ -1133,6 +1687,75 @@ export default function ParametricSashWindow({
         position={[-w / 2 + mm(100) - mm(52), jambOriginY - h / 2, bd / 2 - mm(17)]}
       />
 
+      <StaffBeadHorizontal
+        width={w + mm(104) - mm(160)}
+        position={[0, jambOriginY - h / 2 + jambEmbedIntoSill, -bd / 2 + mm(80) - mm(65) - mm(17) - mm(17) + mm(34)]}
+        flipZ={false}
+      />
+      <StaffBeadHorizontal
+        width={w + mm(104) - mm(160)}
+        position={[0, jambOriginY + h / 2 + mm(52) - mm(80) - mm(17), -bd / 2 + mm(80) - mm(65) - mm(17)]}
+        flipZ={true}
+      />
+
+      <StaffBead
+        height={h + mm(52) - jambEmbedIntoSill - mm(80)}
+        side="right"
+        position={[w / 2 + mm(52) - mm(80), jambOriginY - h / 2 + jambEmbedIntoSill, -bd / 2 + mm(80) - mm(65) - mm(17)]}
+      />
+      <StaffBead
+        height={h + mm(52) - jambEmbedIntoSill - mm(80)}
+        side="left"
+        position={[-w / 2 - mm(52) + mm(80), jambOriginY - h / 2 + jambEmbedIntoSill, -bd / 2 + mm(80) - mm(65) - mm(17)]}
+      />
+
+      <InternalBoxElement
+        height={h + mm(52) - jambEmbedIntoSill}
+        side="right"
+        position={[w / 2 + mm(52) - mm(80), jambOriginY - h / 2 + jambEmbedIntoSill, -bd / 2]}
+      />
+      <InternalBoxElement
+        height={h + mm(52) - jambEmbedIntoSill}
+        side="left"
+        position={[-w / 2 - mm(52) + mm(80), jambOriginY - h / 2 + jambEmbedIntoSill, -bd / 2]}
+      />
+
+      <mesh
+        position={[0, jambOriginY + h / 2 + mm(52) - mm(40), -bd / 2 + mm(8.5)]}
+        castShadow
+        receiveShadow
+      >
+        <boxGeometry args={[w + mm(104) - mm(160), mm(80), mm(17)]} />
+        <meshPhysicalMaterial
+          color="#e8c49a"
+          roughness={0.5}
+          metalness={0.0}
+          clearcoat={0.2}
+          clearcoatRoughness={0.12}
+          polygonOffset={true}
+          polygonOffsetFactor={-2}
+          polygonOffsetUnits={-2}
+        />
+      </mesh>
+
+      <mesh
+        position={[0, jambOriginY + h / 2 + mm(50) - mm(48), bd / 2 - mm(8.5)]}
+        castShadow
+        receiveShadow
+      >
+        <boxGeometry args={[w - mm(96), mm(100), mm(17)]} />
+        <meshPhysicalMaterial
+          color="#c8a96e"
+          roughness={0.5}
+          metalness={0.0}
+          clearcoat={0.2}
+          clearcoatRoughness={0.12}
+          polygonOffset={true}
+          polygonOffsetFactor={-2}
+          polygonOffsetUnits={-2}
+        />
+      </mesh>
+
       <Sash
         width={sashWidth}
         height={upperSashHeight}
@@ -1142,8 +1765,9 @@ export default function ParametricSashWindow({
         bottomRail={config.upperMeetingRail}
         zOffset={trackRearZ}
         yOffset={yTopClosed - mm(upperOpeningDrop)}
-        color="#d9e6f2"
+        color="#f9a825"
         glassThickness={config.glassUnitThickness}
+        flipChamfer={true}
       />
 
       <Sash
@@ -1155,9 +1779,10 @@ export default function ParametricSashWindow({
         bottomRail={config.lowerBottomRail}
         zOffset={trackFrontZ}
         yOffset={yBottomClosed + mm(lowerOpeningLift)}
-        color="#e8d9c9"
+        color="#7b1fa2"
         profiledBottom={true}
         glassThickness={config.glassUnitThickness}
+        flipChamfer={true}
       />
 
       {showGuides && (
