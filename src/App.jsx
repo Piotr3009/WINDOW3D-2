@@ -443,21 +443,91 @@ export default function App() {
             <span>RAL colour</span>
             <select value="" onChange={(e) => e.target.value && setWoodColor(e.target.value)}>
               <option value="">— select RAL —</option>
-              <option value="#F2F0EB">RAL 9010 Pure White</option>
-              <option value="#E7E1D4">RAL 9001 Cream White</option>
-              <option value="#1C1C1C">RAL 9005 Jet Black</option>
-              <option value="#767676">RAL 7042 Traffic Grey A</option>
-              <option value="#2E3A3F">RAL 7016 Anthracite Grey</option>
-              <option value="#3D4034">RAL 6009 Fir Green</option>
-              <option value="#4A4F3B">RAL 6003 Olive Green</option>
-              <option value="#1A3060">RAL 5003 Sapphire Blue</option>
-              <option value="#2A4B7C">RAL 5011 Steel Blue</option>
-              <option value="#6B1A2A">RAL 3005 Wine Red</option>
-              <option value="#9B2335">RAL 3003 Ruby Red</option>
-              <option value="#C8853A">RAL 8001 Ochre Brown</option>
-              <option value="#6F4E37">RAL 8011 Nut Brown</option>
-              <option value="#F0EEE8">RAL 9002 Grey White</option>
-              <option value="#E5DDD0">RAL 1015 Light Ivory</option>
+              <optgroup label="Whites &amp; Creams">
+                <option value="#FFFFFF">RAL 9010 Pure White</option>
+                <option value="#F6F6F6">RAL 9016 Traffic White</option>
+                <option value="#F4F4F4">RAL 9003 Signal White</option>
+                <option value="#FDF4E3">RAL 9001 Cream White</option>
+                <option value="#E7EBDA">RAL 9002 Grey White</option>
+                <option value="#E6D690">RAL 1015 Light Ivory</option>
+                <option value="#EAE6CA">RAL 1013 Pearl White</option>
+                <option value="#C2B078">RAL 1001 Beige</option>
+                <option value="#C6A664">RAL 1002 Sand Yellow</option>
+              </optgroup>
+              <optgroup label="Greys">
+                <option value="#D7D7D7">RAL 7035 Light Grey</option>
+                <option value="#B5B8B1">RAL 7038 Agate Grey</option>
+                <option value="#8D948D">RAL 7042 Traffic Grey A</option>
+                <option value="#7D7F7D">RAL 7037 Dusty Grey</option>
+                <option value="#78858B">RAL 7000 Squirrel Grey</option>
+                <option value="#8A9597">RAL 7001 Silver Grey</option>
+                <option value="#9EA0A1">RAL 7004 Signal Grey</option>
+                <option value="#6C7059">RAL 7005 Mouse Grey</option>
+                <option value="#474A51">RAL 7024 Graphite Grey</option>
+                <option value="#293133">RAL 7016 Anthracite Grey</option>
+                <option value="#23282B">RAL 7021 Black Grey</option>
+                <option value="#434750">RAL 7015 Slate Grey</option>
+                <option value="#4E5754">RAL 7012 Basalt Grey</option>
+                <option value="#4C514A">RAL 7010 Tarpaulin Grey</option>
+              </optgroup>
+              <optgroup label="Blacks">
+                <option value="#0A0A0A">RAL 9005 Jet Black</option>
+                <option value="#1C2023">RAL 9011 Graphite Black</option>
+                <option value="#1E1E1E">RAL 9017 Traffic Black</option>
+                <option value="#282828">RAL 9004 Signal Black</option>
+              </optgroup>
+              <optgroup label="Greens">
+                <option value="#31372B">RAL 6009 Fir Green</option>
+                <option value="#2F4538">RAL 6005 Moss Green</option>
+                <option value="#343B29">RAL 6007 Bottle Green</option>
+                <option value="#1F3A3D">RAL 6004 Blue Green</option>
+                <option value="#4A4F3B">RAL 6003 Olive Green</option>
+                <option value="#424632">RAL 6013 Reed Green</option>
+                <option value="#587246">RAL 6011 Reseda Green</option>
+                <option value="#35682D">RAL 6010 Grass Green</option>
+                <option value="#4C9141">RAL 6017 May Green</option>
+                <option value="#308446">RAL 6024 Traffic Green</option>
+                <option value="#1E5945">RAL 6016 Turquoise Green</option>
+                <option value="#3F888F">RAL 5018 Turquoise Blue</option>
+              </optgroup>
+              <optgroup label="Blues">
+                <option value="#1E2460">RAL 5002 Ultramarine Blue</option>
+                <option value="#1D1E33">RAL 5004 Black Blue</option>
+                <option value="#1B2A4A">RAL 5011 Steel Blue</option>
+                <option value="#2271B3">RAL 5015 Sky Blue</option>
+                <option value="#063971">RAL 5017 Traffic Blue</option>
+                <option value="#3B83BD">RAL 5012 Light Blue</option>
+                <option value="#1B5583">RAL 5019 Capri Blue</option>
+                <option value="#354D73">RAL 5000 Violet Blue</option>
+                <option value="#49678D">RAL 5023 Distant Blue</option>
+                <option value="#5D9B9B">RAL 5024 Pastel Blue</option>
+              </optgroup>
+              <optgroup label="Reds &amp; Pinks">
+                <option value="#AF2B1E">RAL 3000 Flame Red</option>
+                <option value="#9B111E">RAL 3003 Ruby Red</option>
+                <option value="#75151E">RAL 3004 Purple Red</option>
+                <option value="#5E2129">RAL 3005 Wine Red</option>
+                <option value="#B32821">RAL 3016 Coral Red</option>
+                <option value="#D53032">RAL 3018 Strawberry Red</option>
+                <option value="#CC0605">RAL 3020 Traffic Red</option>
+              </optgroup>
+              <optgroup label="Browns">
+                <option value="#955F20">RAL 8001 Ochre Brown</option>
+                <option value="#6F4F28">RAL 8008 Olive Brown</option>
+                <option value="#6F3B2A">RAL 8011 Nut Brown</option>
+                <option value="#59351F">RAL 8007 Fawn Brown</option>
+                <option value="#4E3B31">RAL 8028 Terra Brown</option>
+                <option value="#45322E">RAL 8017 Chocolate Brown</option>
+                <option value="#382C1E">RAL 8014 Sepia Brown</option>
+              </optgroup>
+              <optgroup label="Yellows &amp; Oranges">
+                <option value="#E5BE01">RAL 1003 Signal Yellow</option>
+                <option value="#F8F32B">RAL 1018 Zinc Yellow</option>
+                <option value="#F4A900">RAL 1028 Melon Yellow</option>
+                <option value="#ED760E">RAL 2000 Yellow Orange</option>
+                <option value="#FF7514">RAL 2003 Pastel Orange</option>
+                <option value="#F44611">RAL 2004 Pure Orange</option>
+              </optgroup>
             </select>
           </label>
 
@@ -465,21 +535,87 @@ export default function App() {
             <span>Farrow &amp; Ball</span>
             <select value="" onChange={(e) => e.target.value && setWoodColor(e.target.value)}>
               <option value="">— select F&amp;B —</option>
-              <option value="#F4F0E4">No. 2002 James White</option>
-              <option value="#EDE8D8">No. 2012 Cream</option>
-              <option value="#E8E0CC">No. 203 String</option>
-              <option value="#D5C9B0">No. 201 Elephant's Breath</option>
-              <option value="#C2B49A">No. 40 Bone</option>
-              <option value="#2C3531">No. 92 Down Pipe</option>
-              <option value="#3B3D38">No. 26 Mole's Breath</option>
-              <option value="#4A5240">No. 80 Calke Green</option>
-              <option value="#6B7B5E">No. 80 Mizzle</option>
-              <option value="#1B3A5C">No. 220 Hague Blue</option>
-              <option value="#233B5A">No. 232 Stiffkey Blue</option>
-              <option value="#7A1F2E">No. 310 Rectory Red</option>
-              <option value="#5C1A25">No. 43 Incarnadine</option>
-              <option value="#F2EDE0">No. 2001 All White</option>
-              <option value="#EEEADE">No. 2003 Pointing</option>
+              <optgroup label="Whites">
+                <option value="#F6F4EE">All White 2005</option>
+                <option value="#F4F0E4">James White 2010</option>
+                <option value="#EEEADE">Pointing 2003</option>
+                <option value="#EDE8D8">Cream 2012</option>
+                <option value="#EAE4D4">White Tie 2002</option>
+                <option value="#E8E2CC">String 8</option>
+                <option value="#F2EEE4">Wimborne White 239</option>
+                <option value="#EDE6D4">Slipper Satin 2004</option>
+                <option value="#EAE0C8">Skimming Stone 241</option>
+                <option value="#F0EAD8">New White 59</option>
+              </optgroup>
+              <optgroup label="Neutrals &amp; Stones">
+                <option value="#D5C9B0">Elephant's Breath 229</option>
+                <option value="#C8BC9E">Mole's Breath 276</option>
+                <option value="#C2B49A">Bone 15</option>
+                <option value="#BEB49A">Hardwick White 5</option>
+                <option value="#B4A890">Purbeck Stone 275</option>
+                <option value="#AFA08A">Joa's White 226</option>
+                <option value="#A89880">Savage Ground 213</option>
+                <option value="#9E8E70">Dead Salmon 28</option>
+                <option value="#9A8870">Shaded White 201</option>
+                <option value="#8E7E68">Buff 20</option>
+                <option value="#7A6A54">Oxford Stone 264</option>
+                <option value="#6C5C46">Sand II 40</option>
+                <option value="#645448">Sand III 21</option>
+                <option value="#5C4C3A">Mouse's Back 40</option>
+              </optgroup>
+              <optgroup label="Greys">
+                <option value="#B8B8B0">Mizzle 266</option>
+                <option value="#A8A8A0">Pigeon 25</option>
+                <option value="#989890">Lamp Room Gray 88</option>
+                <option value="#888880">Pavilion Gray 242</option>
+                <option value="#787870">Worsted 284</option>
+                <option value="#686860">Plummett 272</option>
+                <option value="#585850">Brassica 271</option>
+                <option value="#484840">Mole's Breath 276</option>
+                <option value="#383830">Down Pipe 26</option>
+                <option value="#2C3531">Railings 31</option>
+                <option value="#3B3D38">Off-Black 57</option>
+                <option value="#2E3028">Pitch Black 256</option>
+              </optgroup>
+              <optgroup label="Blues">
+                <option value="#1B3A5C">Hague Blue 30</option>
+                <option value="#233B5A">Stiffkey Blue 281</option>
+                <option value="#2A4870">Inchyra Blue 289</option>
+                <option value="#2C4870">Pitch Blue 220</option>
+                <option value="#3A5878">Prussian Blue 232</option>
+                <option value="#4A6888">Lulworth Blue 89</option>
+                <option value="#5A7898">Parma Gray 27</option>
+                <option value="#6A88A8">Mizzle Light</option>
+                <option value="#7898B8">Pale Powder 204</option>
+                <option value="#8898A8">Borrowed Light 235</option>
+              </optgroup>
+              <optgroup label="Greens">
+                <option value="#4A5240">Calke Green 34</option>
+                <option value="#3A4A30">Viridian 214</option>
+                <option value="#4A5A3A">Chappell Green 83</option>
+                <option value="#5A6A4A">Mizzle Green</option>
+                <option value="#6A7A5A">Saxon Green 80</option>
+                <option value="#7A8A6A">Lichen 19</option>
+                <option value="#8A9A7A">Green Ground 206</option>
+                <option value="#9AAA8A">Mist Green</option>
+                <option value="#526B58">Card Room Green 79</option>
+                <option value="#3D5A42">Pea Green 33</option>
+              </optgroup>
+              <optgroup label="Reds &amp; Pinks">
+                <option value="#7A1F2E">Rectory Red 217</option>
+                <option value="#5C1A25">Incarnadine 248</option>
+                <option value="#8A2A3A">Blazer 212</option>
+                <option value="#C86070">Cinder Rose 246</option>
+                <option value="#D8707E">Pelt 254</option>
+                <option value="#E88A96">Pink Ground 202</option>
+              </optgroup>
+              <optgroup label="Yellows &amp; Oranges">
+                <option value="#D4A84B">India Yellow 66</option>
+                <option value="#C49840">Sudbury Yellow 51</option>
+                <option value="#D4884A">Setting Plaster 231</option>
+                <option value="#C87840">Dutch Orange 235</option>
+                <option value="#A86030">Charlotte's Locks 268</option>
+              </optgroup>
             </select>
           </label>
 
