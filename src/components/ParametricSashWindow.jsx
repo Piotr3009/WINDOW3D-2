@@ -4,8 +4,8 @@ import * as THREE from 'three';
 
 const mm = (value) => value / 1000;
 
-const EXT_BEAD_W = mm(15);
-const EXT_BEAD_D = mm(9);
+const EXT_BEAD_W = mm(9);
+const EXT_BEAD_D = mm(15);
 const INT_BEAD_W = mm(18);
 const INT_BEAD_D = mm(14);
 const INT_BEAD_R = mm(11);
@@ -268,10 +268,13 @@ function ExternalStileBead({
     const mh = mm(height);
     const md = mm(depth);
 
+    const extV = flip ? md : 0;
+    const stepV = flip ? -EXT_BEAD_D : EXT_BEAD_D;
+
     const local = [
-      [mw - EXT_BEAD_W, 0],
-      [mw, 0],
-      [mw, EXT_BEAD_D],
+      [mw - EXT_BEAD_W, extV],
+      [mw, extV],
+      [mw, extV + stepV],
     ];
 
     const points = local.map(([u, v]) =>
@@ -314,10 +317,13 @@ function ExternalRailBead({
     const mh = mm(height);
     const md = mm(depth);
 
+    const extV = flip ? md : 0;
+    const stepV = flip ? -EXT_BEAD_D : EXT_BEAD_D;
+
     const local = [
-      [mh - EXT_BEAD_W, 0],
-      [mh, 0],
-      [mh, EXT_BEAD_D],
+      [mh - EXT_BEAD_W, extV],
+      [mh, extV],
+      [mh, extV + stepV],
     ];
 
     const points = local.map(([u, v]) =>
@@ -518,15 +524,6 @@ function LowerBottomRail({ width, height, depth, yCenter, stileWidth, coreMateri
         depth={depth}
         material={coreMaterial}
       />
-      <ExternalRailBead
-        width={extBeadWidth}
-        height={height}
-        depth={depth}
-        openingSide="top"
-        flip={flip}
-        position={[0, 0, 0]}
-        material={extBeadMaterial}
-      />
       <InternalOvoloRailBead
         width={intBeadWidth}
         height={height}
@@ -621,15 +618,6 @@ function Sash({
         position={[-w / 2 + stile / 2, 0, 0]}
         material={coreMaterial}
       />
-      <ExternalStileBead
-        width={stileWidth}
-        height={height - topRail - bottomRail + 15 * 2}
-        depth={depth}
-        openingSide="right"
-        flip={flipChamfer}
-        position={[-w / 2 + stile / 2, glassY, 0]}
-        material={externalBeadMaterial}
-      />
       <InternalOvoloStileBead
         width={stileWidth}
         height={height - topRail - bottomRail + 18 * 2}
@@ -649,15 +637,6 @@ function Sash({
         position={[w / 2 - stile / 2, 0, 0]}
         material={coreMaterial}
       />
-      <ExternalStileBead
-        width={stileWidth}
-        height={height - topRail - bottomRail + 15 * 2}
-        depth={depth}
-        openingSide="left"
-        flip={flipChamfer}
-        position={[w / 2 - stile / 2, glassY, 0]}
-        material={externalBeadMaterial}
-      />
       <InternalOvoloStileBead
         width={stileWidth}
         height={height - topRail - bottomRail + 18 * 2}
@@ -676,15 +655,6 @@ function Sash({
         flip={flipChamfer}
         position={[0, topRailY, 0]}
         material={coreMaterial}
-      />
-      <ExternalRailBead
-        width={width - stileWidth * 2 + 15 * 2}
-        height={topRail}
-        depth={depth}
-        openingSide="bottom"
-        flip={flipChamfer}
-        position={[0, topRailY, 0]}
-        material={externalBeadMaterial}
       />
       <InternalOvoloRailBead
         width={width - stileWidth * 2 + 18 * 2}
@@ -719,15 +689,6 @@ function Sash({
             position={[0, bottomRailY, 0]}
             material={coreMaterial}
           />
-          <ExternalRailBead
-            width={width - stileWidth * 2 + 15 * 2}
-            height={bottomRail}
-            depth={depth}
-            openingSide="top"
-            flip={flipChamfer}
-            position={[0, bottomRailY, 0]}
-            material={externalBeadMaterial}
-          />
           <InternalOvoloRailBead
             width={width - stileWidth * 2 + 18 * 2}
             height={bottomRail}
@@ -739,22 +700,6 @@ function Sash({
           />
         </>
       )}
-
-      <group position={[0, glassY, glazingLineZ]} renderOrder={10}>
-        <Line
-          points={[
-            [-glazingEdgeLineWidth / 2, glazingEdgeLineHeight / 2, 0],
-            [glazingEdgeLineWidth / 2, glazingEdgeLineHeight / 2, 0],
-            [glazingEdgeLineWidth / 2, -glazingEdgeLineHeight / 2, 0],
-            [-glazingEdgeLineWidth / 2, -glazingEdgeLineHeight / 2, 0],
-            [-glazingEdgeLineWidth / 2, glazingEdgeLineHeight / 2, 0],
-          ]}
-          color="#2f7d32"
-          lineWidth={1.5}
-          transparent
-          opacity={0.95}
-        />
-      </group>
 
       <GlassPane size={[clearWidth, clearHeight, glassD]} position={[0, glassY, glassCenterZ]} />
     </group>
