@@ -6,7 +6,6 @@ const mm = (value) => value / 1000;
 
 const EXT_BEAD_W = mm(15);
 const EXT_BEAD_D = mm(9);
-
 const INT_BEAD_W = mm(18);
 const INT_BEAD_D = mm(14);
 const INT_BEAD_R = mm(11);
@@ -46,9 +45,9 @@ function buildCoreLocalProfile(memberSize, memberDepth) {
 
 function buildOvoloSolidLocalPoints(samples = 20) {
   const points = [];
-  const topFlat = INT_BEAD_W - INT_BEAD_R; // 7 mm
+  const topFlat = INT_BEAD_W - INT_BEAD_R;
   const centerX = topFlat;
-  const centerY = INT_BEAD_D - INT_BEAD_R; // 3 mm
+  const centerY = INT_BEAD_D - INT_BEAD_R;
 
   points.push([0, 0]);
   points.push([0, INT_BEAD_D]);
@@ -64,7 +63,6 @@ function buildOvoloSolidLocalPoints(samples = 20) {
   }
 
   points.push([INT_BEAD_W, 0]);
-
   return points;
 }
 
@@ -500,7 +498,7 @@ function BottomRailLowerProfile({ width, height, depth, material }) {
   );
 }
 
-function LowerBottomRail({ width, height, depth, yCenter, material, flip = false }) {
+function LowerBottomRail({ width, height, depth, yCenter, coreMaterial, extBeadMaterial, intBeadMaterial, flip = false }) {
   return (
     <group position={[0, yCenter, 0]}>
       <SashRailCore
@@ -509,13 +507,14 @@ function LowerBottomRail({ width, height, depth, yCenter, material, flip = false
         depth={depth}
         openingSide="top"
         flip={flip}
-        material={material}
+        position={[0, 0, 0]}
+        material={coreMaterial}
       />
       <BottomRailLowerProfile
         width={width}
         height={height}
         depth={depth}
-        material={material}
+        material={coreMaterial}
       />
       <ExternalRailBead
         width={width}
@@ -523,7 +522,8 @@ function LowerBottomRail({ width, height, depth, yCenter, material, flip = false
         depth={depth}
         openingSide="top"
         flip={flip}
-        material={material}
+        position={[0, 0, 0]}
+        material={extBeadMaterial}
       />
       <InternalOvoloRailBead
         width={width}
@@ -531,7 +531,8 @@ function LowerBottomRail({ width, height, depth, yCenter, material, flip = false
         depth={depth}
         openingSide="top"
         flip={flip}
-        material={material}
+        position={[0, 0, 0]}
+        material={intBeadMaterial}
       />
     </group>
   );
@@ -551,7 +552,7 @@ function Sash({
   glassThickness = 24,
   flipChamfer = false,
 }) {
-  const material = useMemo(
+  const coreMaterial = useMemo(
     () =>
       new THREE.MeshPhysicalMaterial({
         color,
@@ -561,6 +562,30 @@ function Sash({
         clearcoatRoughness: 0.12,
       }),
     [color]
+  );
+
+  const externalBeadMaterial = useMemo(
+    () =>
+      new THREE.MeshPhysicalMaterial({
+        color: '#00bcd4',
+        roughness: 0.38,
+        metalness: 0.04,
+        clearcoat: 0.25,
+        clearcoatRoughness: 0.1,
+      }),
+    []
+  );
+
+  const internalBeadMaterial = useMemo(
+    () =>
+      new THREE.MeshPhysicalMaterial({
+        color: '#d81b60',
+        roughness: 0.38,
+        metalness: 0.04,
+        clearcoat: 0.25,
+        clearcoatRoughness: 0.1,
+      }),
+    []
   );
 
   const w = mm(width);
@@ -585,7 +610,6 @@ function Sash({
 
   return (
     <group position={[0, yOffset, zOffset]}>
-      {/* left stile */}
       <SashStileCore
         width={stileWidth}
         height={height}
@@ -593,28 +617,27 @@ function Sash({
         openingSide="right"
         flip={flipChamfer}
         position={[-w / 2 + stile / 2, 0, 0]}
-        material={material}
+        material={coreMaterial}
       />
       <ExternalStileBead
         width={stileWidth}
-        height={height}
+        height={height - topRail - bottomRail}
         depth={depth}
         openingSide="right"
         flip={flipChamfer}
-        position={[-w / 2 + stile / 2, 0, 0]}
-        material={material}
+        position={[-w / 2 + stile / 2, glassY, 0]}
+        material={externalBeadMaterial}
       />
       <InternalOvoloStileBead
         width={stileWidth}
-        height={height}
+        height={height - topRail - bottomRail}
         depth={depth}
         openingSide="right"
         flip={flipChamfer}
-        position={[-w / 2 + stile / 2, 0, 0]}
-        material={material}
+        position={[-w / 2 + stile / 2, glassY, 0]}
+        material={internalBeadMaterial}
       />
 
-      {/* right stile */}
       <SashStileCore
         width={stileWidth}
         height={height}
@@ -622,28 +645,27 @@ function Sash({
         openingSide="left"
         flip={flipChamfer}
         position={[w / 2 - stile / 2, 0, 0]}
-        material={material}
+        material={coreMaterial}
       />
       <ExternalStileBead
         width={stileWidth}
-        height={height}
+        height={height - topRail - bottomRail}
         depth={depth}
         openingSide="left"
         flip={flipChamfer}
-        position={[w / 2 - stile / 2, 0, 0]}
-        material={material}
+        position={[w / 2 - stile / 2, glassY, 0]}
+        material={externalBeadMaterial}
       />
       <InternalOvoloStileBead
         width={stileWidth}
-        height={height}
+        height={height - topRail - bottomRail}
         depth={depth}
         openingSide="left"
         flip={flipChamfer}
-        position={[w / 2 - stile / 2, 0, 0]}
-        material={material}
+        position={[w / 2 - stile / 2, glassY, 0]}
+        material={internalBeadMaterial}
       />
 
-      {/* top rail */}
       <SashRailCore
         width={width}
         height={topRail}
@@ -651,35 +673,36 @@ function Sash({
         openingSide="bottom"
         flip={flipChamfer}
         position={[0, topRailY, 0]}
-        material={material}
+        material={coreMaterial}
       />
       <ExternalRailBead
-        width={width}
+        width={width - stileWidth * 2}
         height={topRail}
         depth={depth}
         openingSide="bottom"
         flip={flipChamfer}
         position={[0, topRailY, 0]}
-        material={material}
+        material={externalBeadMaterial}
       />
       <InternalOvoloRailBead
-        width={width}
+        width={width - stileWidth * 2}
         height={topRail}
         depth={depth}
         openingSide="bottom"
         flip={flipChamfer}
         position={[0, topRailY, 0]}
-        material={material}
+        material={internalBeadMaterial}
       />
 
-      {/* bottom rail */}
       {profiledBottom ? (
         <LowerBottomRail
           width={width}
           height={bottomRail}
           depth={depth}
           yCenter={bottomRailY}
-          material={material}
+          coreMaterial={coreMaterial}
+          extBeadMaterial={externalBeadMaterial}
+          intBeadMaterial={internalBeadMaterial}
           flip={flipChamfer}
         />
       ) : (
@@ -691,25 +714,25 @@ function Sash({
             openingSide="top"
             flip={flipChamfer}
             position={[0, bottomRailY, 0]}
-            material={material}
+            material={coreMaterial}
           />
           <ExternalRailBead
-            width={width}
+            width={width - stileWidth * 2}
             height={bottomRail}
             depth={depth}
             openingSide="top"
             flip={flipChamfer}
             position={[0, bottomRailY, 0]}
-            material={material}
+            material={externalBeadMaterial}
           />
           <InternalOvoloRailBead
-            width={width}
+            width={width - stileWidth * 2}
             height={bottomRail}
             depth={depth}
             openingSide="top"
             flip={flipChamfer}
             position={[0, bottomRailY, 0]}
-            material={material}
+            material={internalBeadMaterial}
           />
         </>
       )}
@@ -1508,6 +1531,7 @@ export default function ParametricSashWindow({
   opening = 0,
   upperOpening = 0,
   showGuides = true,
+  pulleyDemoTravel = 0,
 }) {
   const jambMaterial = useMemo(
     () =>
@@ -1708,7 +1732,6 @@ export default function ParametricSashWindow({
         side="left"
         position={[-w / 2 - mm(52) + mm(80), jambOriginY - h / 2 + jambEmbedIntoSill, -bd / 2 + mm(80) - mm(65) - mm(17)]}
       />
-
       <InternalBoxElement
         height={h + mm(52) - jambEmbedIntoSill}
         side="right"
@@ -1719,7 +1742,6 @@ export default function ParametricSashWindow({
         side="left"
         position={[-w / 2 - mm(52) + mm(80), jambOriginY - h / 2 + jambEmbedIntoSill, -bd / 2]}
       />
-
       <mesh
         position={[0, jambOriginY + h / 2 + mm(52) - mm(40), -bd / 2 + mm(8.5)]}
         castShadow
@@ -1767,7 +1789,7 @@ export default function ParametricSashWindow({
         yOffset={yTopClosed - mm(upperOpeningDrop)}
         color="#f9a825"
         glassThickness={config.glassUnitThickness}
-        flipChamfer={true}
+        flipChamfer={false}
       />
 
       <Sash
@@ -1782,7 +1804,7 @@ export default function ParametricSashWindow({
         color="#7b1fa2"
         profiledBottom={true}
         glassThickness={config.glassUnitThickness}
-        flipChamfer={true}
+        flipChamfer={false}
       />
 
       {showGuides && (
