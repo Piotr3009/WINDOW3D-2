@@ -548,37 +548,142 @@ const BAR_PATTERNS = {
 
 function GlazingBars({ clearWidth, clearHeight, glassDepth, barPattern = 'none', material }) {
   const pattern = BAR_PATTERNS[barPattern] || BAR_PATTERNS['none'];
-  const barW = mm(20);
-  const barD = glassDepth;
+  const barW = mm(22);
+  const barH = mm(16.5);
+  const barTop = mm(2);
+  const glassHalf = glassDepth / 2;
+
+  const trapezoidGeom = useMemo(() => {
+    const shape = new THREE.Shape();
+    shape.moveTo(-barW / 2, 0);
+    shape.lineTo(-barTop / 2, barH);
+    shape.lineTo(barTop / 2, barH);
+    shape.lineTo(barW / 2, 0);
+    shape.closePath();
+    return shape;
+  }, []);
+
+  const trapezoidHGeom = useMemo(() => {
+    const shape = new THREE.Shape();
+    shape.moveTo(0, -barW / 2);
+    shape.lineTo(barH, -barTop / 2);
+    shape.lineTo(barH, barTop / 2);
+    shape.lineTo(0, barW / 2);
+    shape.closePath();
+    return shape;
+  }, []);
+
+  const vGeom = useMemo(() => {
+    const g = new THREE.ExtrudeGeometry(trapezoidGeom, {
+      depth: clearHeight + mm(18),
+      bevelEnabled: false,
+      steps: 1,
+    });
+    g.rotateX(-Math.PI / 2);
+    g.translate(0, -(clearHeight + mm(18)) / 2, 0);
+    g.computeVertexNormals();
+    return g;
+  }, [clearHeight, trapezoidGeom]);
+
+  const hGeom = useMemo(() => {
+    const g = new THREE.ExtrudeGeometry(trapezoidHGeom, {
+      depth: clearWidth + mm(18),
+      bevelEnabled: false,
+      steps: 1,
+    });
+    g.rotateY(Math.PI / 2);
+    g.translate(-(clearWidth + mm(18)) / 2, 0, 0);
+    g.computeVertexNormals();
+    return g;
+  }, [clearWidth, trapezoidHGeom]);
+
+  const drop = mm(2);
+  const sqH = mm(2);
+
+  const ovoloIntShape = useMemo(() => {
+    const shape = new THREE.Shape();
+    shape.moveTo(-barW / 2, 0);
+    shape.quadraticCurveTo(-barW / 2, barH - drop - sqH, -barTop / 2, barH - sqH);
+    shape.lineTo(-barTop / 2, barH);
+    shape.lineTo(barTop / 2, barH);
+    shape.lineTo(barTop / 2, barH - sqH);
+    shape.quadraticCurveTo(barW / 2, barH - drop - sqH, barW / 2, 0);
+    shape.closePath();
+    return shape;
+  }, []);
+
+  const ovoloIntHShape = useMemo(() => {
+    const shape = new THREE.Shape();
+    shape.moveTo(0, -barW / 2);
+    shape.quadraticCurveTo(barH - drop - sqH, -barW / 2, barH - sqH, -barTop / 2);
+    shape.lineTo(barH, -barTop / 2);
+    shape.lineTo(barH, barTop / 2);
+    shape.lineTo(barH - sqH, barTop / 2);
+    shape.quadraticCurveTo(barH - drop - sqH, barW / 2, 0, barW / 2);
+    shape.closePath();
+    return shape;
+  }, []);
+
+  const vGeomInt = useMemo(() => {
+    const g = new THREE.ExtrudeGeometry(ovoloIntShape, {
+      depth: clearHeight + mm(18),
+      bevelEnabled: false,
+      steps: 1,
+      curveSegments: 32,
+    });
+    g.rotateX(-Math.PI / 2);
+    g.translate(0, -(clearHeight + mm(18)) / 2, 0);
+    g.computeVertexNormals();
+    return g;
+  }, [clearHeight, ovoloIntShape]);
+
+  const hGeomInt = useMemo(() => {
+    const g = new THREE.ExtrudeGeometry(ovoloIntHShape, {
+      depth: clearWidth + mm(18),
+      bevelEnabled: false,
+      steps: 1,
+      curveSegments: 32,
+    });
+    g.rotateY(Math.PI / 2);
+    g.translate(-(clearWidth + mm(18)) / 2, 0, 0);
+    g.computeVertexNormals();
+    return g;
+  }, [clearWidth, ovoloIntHShape]);
 
   const bars = useMemo(() => {
     const items = [];
     const { h, v } = pattern;
-
     for (let i = 1; i <= v; i++) {
       const x = -clearWidth / 2 + (clearWidth / (v + 1)) * i;
-      items.push({ type: 'v', x, y: 0, w: barW, h: clearHeight, d: barD });
+      items.push({ type: 'v', x, y: 0 });
     }
-
     for (let i = 1; i <= h; i++) {
       const y = -clearHeight / 2 + (clearHeight / (h + 1)) * i;
-      items.push({ type: 'h', x: 0, y, w: clearWidth, h: barW, d: barD });
+      items.push({ type: 'h', x: 0, y });
     }
-
     return items;
-  }, [clearWidth, clearHeight, barD, pattern.h, pattern.v]);
+  }, [clearWidth, clearHeight, pattern.h, pattern.v]);
+
+  if (bars.length === 0) return null;
 
   return (
     <group>
-      {bars.map((bar, i) => (
-        <mesh key={i} position={[bar.x, bar.y, 0]} castShadow receiveShadow>
-          <boxGeometry args={bar.type === 'v'
-            ? [bar.w, bar.h, bar.d]
-            : [bar.w, bar.h, bar.d]}
-          />
-          <primitive object={material} attach="material" />
-        </mesh>
-      ))}
+      {bars.map((bar, i) => {
+        const geom = bar.type === 'v' ? vGeom : hGeom;
+        const geomInt = bar.type === 'v' ? vGeomInt : hGeomInt;
+        return (
+          <group key={i} position={[bar.x, bar.y, 0]}>
+            {/* exterior side - trapez */}
+            <mesh geometry={geomInt} position={[0, 0, -glassHalf]} rotation={[0, 0, 0]} castShadow receiveShadow>
+              <primitive object={material} attach="material" />
+            </mesh>
+            {/* interior side - ovolo */}
+            <mesh geometry={geom} position={[0, 0, glassHalf]} rotation={[Math.PI, 0, 0]} castShadow receiveShadow>
+              <primitive object={material} attach="material" />
+            </mesh>
+          </group>
+        );
+      })}
     </group>
   );
 }
