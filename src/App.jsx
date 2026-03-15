@@ -113,6 +113,9 @@ export default function App() {
   const [autoRotate, setAutoRotate] = useState(false);
   const [showGuides, setShowGuides] = useState(true);
   const [boxType, setBoxType] = useState('standard');
+  const [upperBars, setUpperBars] = useState('none');
+  const [lowerBars, setLowerBars] = useState('none');
+  const [sameBars, setSameBars] = useState(true);
 
   const maxSashOpening = Math.max(0, height / 2 - 120);
 
@@ -127,8 +130,10 @@ export default function App() {
       boxDepth: boxType === 'standard' ? 164 : 146,
       sashDepth: 57,
       boxType,
+      upperBars,
+      lowerBars,
     }),
-    [width, height, opening, upperOpening, autoRotate, showGuides, boxType],
+    [width, height, opening, upperOpening, autoRotate, showGuides, boxType, upperBars, lowerBars],
   );
 
   return (
@@ -161,6 +166,48 @@ export default function App() {
             step={5}
             onChange={setUpperOpening}
           />
+        </div>
+
+        <div className="card">
+          <h2>Glazing bars</h2>
+          <Toggle
+            label="Same bars for both sashes"
+            checked={sameBars}
+            onChange={(v) => {
+              setSameBars(v);
+              if (v) setLowerBars(upperBars);
+            }}
+          />
+          <label className="select-wrap">
+            <span>Upper sash</span>
+            <select
+              value={upperBars}
+              onChange={(e) => {
+                setUpperBars(e.target.value);
+                if (sameBars) setLowerBars(e.target.value);
+              }}
+            >
+              <option value="none">No bars</option>
+              <option value="2x2">2×2</option>
+              <option value="3x3">3×3</option>
+              <option value="4x4">4×4</option>
+              <option value="6x6">6×6</option>
+              <option value="9x9">9×9</option>
+            </select>
+          </label>
+          {!sameBars && (
+            <label className="select-wrap">
+              <span>Lower sash</span>
+              <select value={lowerBars} onChange={(e) => setLowerBars(e.target.value)}>
+                <option value="none">No bars</option>
+                <option value="2x2">2×2</option>
+                <option value="3x3">3×3</option>
+                <option value="4x4">4×4</option>
+                <option value="6x6">6×6</option>
+                <option value="9x9">9×9</option>
+              </select>
+            </label>
+          )}
         </div>
 
         <div className="card">

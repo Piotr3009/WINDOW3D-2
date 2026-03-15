@@ -537,6 +537,52 @@ function LowerBottomRail({ width, height, depth, yCenter, stileWidth, coreMateri
   );
 }
 
+const BAR_PATTERNS = {
+  'none':        { h: 0, v: 0 },
+  '2x2':        { h: 0, v: 1 },
+  '3x3':        { h: 0, v: 2 },
+  '4x4':        { h: 1, v: 1 },
+  '6x6':        { h: 1, v: 2 },
+  '9x9':        { h: 2, v: 2 },
+};
+
+function GlazingBars({ clearWidth, clearHeight, glassDepth, barPattern = 'none', material }) {
+  const pattern = BAR_PATTERNS[barPattern] || BAR_PATTERNS['none'];
+  const barW = mm(20);
+  const barD = glassDepth;
+
+  const bars = useMemo(() => {
+    const items = [];
+    const { h, v } = pattern;
+
+    for (let i = 1; i <= v; i++) {
+      const x = -clearWidth / 2 + (clearWidth / (v + 1)) * i;
+      items.push({ type: 'v', x, y: 0, w: barW, h: clearHeight, d: barD });
+    }
+
+    for (let i = 1; i <= h; i++) {
+      const y = -clearHeight / 2 + (clearHeight / (h + 1)) * i;
+      items.push({ type: 'h', x: 0, y, w: clearWidth, h: barW, d: barD });
+    }
+
+    return items;
+  }, [clearWidth, clearHeight, barD, pattern.h, pattern.v]);
+
+  return (
+    <group>
+      {bars.map((bar, i) => (
+        <mesh key={i} position={[bar.x, bar.y, 0]} castShadow receiveShadow>
+          <boxGeometry args={bar.type === 'v'
+            ? [bar.w, bar.h, bar.d]
+            : [bar.w, bar.h, bar.d]}
+          />
+          <primitive object={material} attach="material" />
+        </mesh>
+      ))}
+    </group>
+  );
+}
+
 function Sash({
   width,
   height,
@@ -550,6 +596,7 @@ function Sash({
   profiledBottom = false,
   glassThickness = 24,
   flipChamfer = false,
+  barPattern = 'none',
 }) {
   const coreMaterial = useMemo(
     () =>
@@ -702,6 +749,15 @@ function Sash({
       )}
 
       <GlassPane size={[clearWidth, clearHeight, glassD]} position={[0, glassY, glassCenterZ]} />
+      <group position={[0, glassY, glassCenterZ]}>
+        <GlazingBars
+          clearWidth={clearWidth}
+          clearHeight={clearHeight}
+          glassDepth={glassD}
+          barPattern={barPattern}
+          material={coreMaterial}
+        />
+      </group>
     </group>
   );
 }
@@ -1479,6 +1535,8 @@ export default function ParametricSashWindow({
   opening = 0,
   upperOpening = 0,
   showGuides = true,
+  upperBars = 'none',
+  lowerBars = 'none',
   pulleyDemoTravel = 0,
 }) {
   const jambMaterial = useMemo(
@@ -1738,6 +1796,7 @@ export default function ParametricSashWindow({
         color="#f9a825"
         glassThickness={config.glassUnitThickness}
         flipChamfer={false}
+        barPattern={upperBars}
       />
 
       <Sash
@@ -1753,6 +1812,7 @@ export default function ParametricSashWindow({
         profiledBottom={true}
         glassThickness={config.glassUnitThickness}
         flipChamfer={false}
+        barPattern={lowerBars}
       />
 
       {showGuides && (
