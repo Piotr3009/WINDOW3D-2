@@ -1,8 +1,10 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { Line, Text } from '@react-three/drei';
+import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 
 const mm = (value) => value / 1000;
+
 
 const EXT_BEAD_W = mm(9);
 const EXT_BEAD_D = mm(15);
@@ -737,38 +739,9 @@ function Sash({
   const colorE = colorExt || color;
   const colorI = colorInt || color;
 
-  const coreMaterial = useMemo(
-    () => new THREE.MeshPhysicalMaterial({
-      color,
-      roughness: 0.46,
-      metalness: 0.02,
-      clearcoat: 0.24,
-      clearcoatRoughness: 0.12,
-    }),
-    [color]
-  );
-
-  const extCoreMaterial = useMemo(
-    () => new THREE.MeshPhysicalMaterial({
-      color: colorE,
-      roughness: 0.46,
-      metalness: 0.02,
-      clearcoat: 0.24,
-      clearcoatRoughness: 0.12,
-    }),
-    [colorE]
-  );
-
-  const intCoreMaterial = useMemo(
-    () => new THREE.MeshPhysicalMaterial({
-      color: colorI,
-      roughness: 0.46,
-      metalness: 0.02,
-      clearcoat: 0.24,
-      clearcoatRoughness: 0.12,
-    }),
-    [colorI]
-  );
+  const coreMaterial    = useMemo(() => new THREE.MeshPhysicalMaterial({ color: colorE, roughness: 0.46, metalness: 0.02, clearcoat: 0.24, clearcoatRoughness: 0.12 }), [colorE]);
+  const extCoreMaterial = useMemo(() => new THREE.MeshPhysicalMaterial({ color: colorE, roughness: 0.46, metalness: 0.02, clearcoat: 0.24, clearcoatRoughness: 0.12 }), [colorE]);
+  const intCoreMaterial = useMemo(() => new THREE.MeshPhysicalMaterial({ color: colorI, roughness: 0.46, metalness: 0.02, clearcoat: 0.24, clearcoatRoughness: 0.12 }), [colorI]);
 
   const externalBeadMaterial = useMemo(
     () =>
@@ -1600,35 +1573,12 @@ export default function ParametricSashWindow({
   const cExt = woodColorExt || woodColor;
   const cInt = woodColorInt || woodColor;
 
-  const jambMaterial = useMemo(
-    () => new THREE.MeshPhysicalMaterial({ color: cExt, roughness: 0.4, metalness: 0.03, clearcoat: 0.32, clearcoatRoughness: 0.11 }),
-    [cExt]
-  );
-
-  const jambIntMaterial = useMemo(
-    () => new THREE.MeshPhysicalMaterial({ color: cInt, roughness: 0.4, metalness: 0.03, clearcoat: 0.32, clearcoatRoughness: 0.11 }),
-    [cInt]
-  );
-
-  const beadMaterial = useMemo(
-    () => new THREE.MeshPhysicalMaterial({ color: cExt, roughness: 0.5, metalness: 0.02, clearcoat: 0.18, clearcoatRoughness: 0.14 }),
-    [cExt]
-  );
-
-  const beadIntMaterial = useMemo(
-    () => new THREE.MeshPhysicalMaterial({ color: cInt, roughness: 0.5, metalness: 0.02, clearcoat: 0.18, clearcoatRoughness: 0.14 }),
-    [cInt]
-  );
-
-  const sillMaterial = useMemo(
-    () => new THREE.MeshPhysicalMaterial({ color: cExt, roughness: 0.42, metalness: 0.02, clearcoat: 0.22, clearcoatRoughness: 0.12, side: THREE.DoubleSide }),
-    [cExt]
-  );
-
-  const sillIntMaterial = useMemo(
-    () => new THREE.MeshPhysicalMaterial({ color: cInt, roughness: 0.42, metalness: 0.02, clearcoat: 0.22, clearcoatRoughness: 0.12, side: THREE.DoubleSide }),
-    [cInt]
-  );
+  const jambMaterial    = useMemo(() => new THREE.MeshPhysicalMaterial({ color: cExt, roughness: 0.4, metalness: 0.03, clearcoat: 0.32, clearcoatRoughness: 0.11 }), [cExt]);
+  const jambIntMaterial = useMemo(() => new THREE.MeshPhysicalMaterial({ color: cInt, roughness: 0.4, metalness: 0.03, clearcoat: 0.32, clearcoatRoughness: 0.11 }), [cInt]);
+  const beadMaterial    = useMemo(() => new THREE.MeshPhysicalMaterial({ color: cExt, roughness: 0.5, metalness: 0.02, clearcoat: 0.18, clearcoatRoughness: 0.14 }), [cExt]);
+  const beadIntMaterial = useMemo(() => new THREE.MeshPhysicalMaterial({ color: cInt, roughness: 0.5, metalness: 0.02, clearcoat: 0.18, clearcoatRoughness: 0.14 }), [cInt]);
+  const sillMaterial    = useMemo(() => new THREE.MeshPhysicalMaterial({ color: cExt, roughness: 0.42, metalness: 0.02, clearcoat: 0.22, clearcoatRoughness: 0.12, side: THREE.DoubleSide }), [cExt]);
+  const sillIntMaterial = useMemo(() => new THREE.MeshPhysicalMaterial({ color: cInt, roughness: 0.42, metalness: 0.02, clearcoat: 0.22, clearcoatRoughness: 0.12, side: THREE.DoubleSide }), [cInt]);
 
   const pulleyPlateMaterial = useMemo(
     () =>
@@ -1888,6 +1838,226 @@ export default function ParametricSashWindow({
           />
         </group>
       )}
+
+      {/* Fitch Fasteners — na meeting railach, od wewnątrz */}
+      {(() => {
+        const twoFasteneres = width > 1200 || upperBars !== 'none';
+        const xPositions = twoFasteneres
+          ? [-mm(sashWidth / 2 - 150), mm(sashWidth / 2 - 150)]
+          : [0];
+
+        // Body: na dolnym railu górnej sashki — interior face (od środka pokoju)
+        const upperSashBottom = (yTopClosed - mm(upperOpeningDrop)) - mm(upperSashHeight) / 2;
+        const bodyY = upperSashBottom + mm(43) / 2 - mm(18); // centrum railu, offset kształtu
+        const bodyZ = trackRearZ - mm(sashDepth / 2); // interior face górnej sashki
+
+        // Keep: na górnym railu dolnej sashki — interior face
+        const lowerSashTop = (yBottomClosed + mm(lowerOpeningLift)) + mm(lowerSashHeight) / 2;
+        const keepY = lowerSashTop - mm(43) / 2 - mm(5); // centrum railu, offset kształtu
+        const keepZ = trackFrontZ + mm(sashDepth / 2); // interior face dolnej sashki
+
+        return xPositions.map((x, i) => (
+          <group key={i}>
+            <group position={[x, bodyY, bodyZ]} rotation={[Math.PI / 2, Math.PI, 0]} scale={0.001}>
+              <FitchFastenerBody />
+            </group>
+            <group position={[x, keepY, keepZ]} rotation={[Math.PI / 2, Math.PI, 0]} scale={0.001}>
+              <FitchFastenerKeep />
+            </group>
+          </group>
+        ));
+      })()}
+
+      {/* Finger Lifts — na interior face dolnego railu dolnej sashki, 200mm od krawędzi */}
+      {(() => {
+        const lowerSashBottom = (yBottomClosed + mm(lowerOpeningLift)) - mm(lowerSashHeight) / 2;
+        const liftY = lowerSashBottom + mm(45); // centrum bottom rail (90mm/2)
+        const liftZ = trackFrontZ - mm(sashDepth / 2) - mm(1); // interior face
+        const xLeft  = -mm(sashWidth / 2 - 200);
+        const xRight =  mm(sashWidth / 2 - 200);
+        return [xLeft, xRight].map((x, i) => (
+          <group key={i} position={[x, liftY, liftZ]} rotation={[0, Math.PI, 0]} scale={0.022}>
+            <FingerLift />
+          </group>
+        ));
+      })()}
+
+    </group>
+  );
+}
+
+
+function FitchFastenerBody() {
+  const [isLocked, setIsLocked] = useState(true);
+  const leverGroupRef = useRef();
+  const brassMaterial = useMemo(() => new THREE.MeshStandardMaterial({ color: '#d4af37', metalness: 0.92, roughness: 0.18 }), []);
+  const brassDarkMaterial = useMemo(() => new THREE.MeshStandardMaterial({ color: '#b38728', metalness: 0.92, roughness: 0.26 }), []);
+  const steelShadowMaterial = useMemo(() => new THREE.MeshStandardMaterial({ color: '#7a5a16', metalness: 0.7, roughness: 0.38 }), []);
+  const mainBaseShape = useMemo(() => {
+    const s = new THREE.Shape();
+    const halfW = 37.5, bottomY = 0, shoulderY = 18, neckY = 28, topY = 36;
+    s.moveTo(-halfW + 5, bottomY); s.lineTo(halfW - 5, bottomY);
+    s.quadraticCurveTo(halfW, bottomY, halfW, 5);
+    s.lineTo(halfW, shoulderY - 2);
+    s.bezierCurveTo(halfW, shoulderY + 3, 18, neckY - 2, 12, neckY);
+    s.bezierCurveTo(10, 33, 7, topY, 0, topY);
+    s.bezierCurveTo(-7, topY, -10, 33, -12, neckY);
+    s.bezierCurveTo(-18, neckY - 2, -halfW, shoulderY + 3, -halfW, shoulderY - 2);
+    s.lineTo(-halfW, 5); s.quadraticCurveTo(-halfW, bottomY, -halfW + 5, bottomY);
+    s.closePath();
+    const hole1 = new THREE.Path(); hole1.absarc(-29, 8.5, 2.2, 0, Math.PI*2, true);
+    const hole2 = new THREE.Path(); hole2.absarc( 29, 8.5, 2.2, 0, Math.PI*2, true);
+    s.holes.push(hole1, hole2);
+    return s;
+  }, []);
+  const mainBaseConfig = useMemo(() => ({ depth: 3.2, bevelEnabled: true, bevelThickness: 0.8, bevelSize: 0.8, bevelSegments: 4, curveSegments: 40, steps: 1 }), []);
+  const leverShape = useMemo(() => {
+    const s = new THREE.Shape();
+    s.moveTo(-3.2, -2.4); s.lineTo(11.5, -2.6);
+    s.bezierCurveTo(15.5, -2.6, 18.5, -1.9, 21.5, -0.7);
+    s.quadraticCurveTo(24.2, 0, 21.5, 0.7);
+    s.bezierCurveTo(18.5, 1.9, 15.5, 2.6, 11.5, 2.6);
+    s.lineTo(-3.2, 2.4); s.quadraticCurveTo(-5.3, 2.1, -6.1, 0); s.quadraticCurveTo(-5.3, -2.1, -3.2, -2.4);
+    s.closePath(); return s;
+  }, []);
+  const leverConfig = useMemo(() => ({ depth: 2.6, bevelEnabled: true, bevelThickness: 0.45, bevelSize: 0.45, bevelSegments: 3, curveSegments: 28, steps: 1 }), []);
+  const knobGeometry = useMemo(() => new THREE.SphereGeometry(3.6, 24, 24), []);
+  const pivotGeometry = useMemo(() => { const g = new THREE.CylinderGeometry(5.4, 5.4, 3.6, 32); g.rotateX(Math.PI/2); return g; }, []);
+  const collarGeometry = useMemo(() => { const g = new THREE.CylinderGeometry(3.8, 3.8, 0.8, 28); g.rotateX(Math.PI/2); return g; }, []);
+  const screwHeadGeometry = useMemo(() => { const g = new THREE.CylinderGeometry(2.9, 2.9, 1.1, 28); g.rotateX(Math.PI/2); return g; }, []);
+  const screwSlotGeometry = useMemo(() => new THREE.BoxGeometry(3.2, 0.45, 0.35), []);
+  useFrame((_, delta) => {
+    if (!leverGroupRef.current) return;
+    const target = isLocked ? -0.58 : 0.18;
+    leverGroupRef.current.rotation.z = THREE.MathUtils.damp(leverGroupRef.current.rotation.z, target, 8, delta);
+  });
+  return (
+    <group>
+      <mesh position={[0, 8, 0]} castShadow receiveShadow material={brassMaterial}>
+        <extrudeGeometry args={[mainBaseShape, mainBaseConfig]} />
+      </mesh>
+      <mesh position={[0, 34, 2.2]} castShadow receiveShadow geometry={pivotGeometry} material={brassDarkMaterial} />
+      <group ref={leverGroupRef} position={[0, 34, 4.2]} rotation={[0, 0, -0.58]} onClick={(e) => { e.stopPropagation(); setIsLocked(v => !v); }}>
+        <mesh castShadow receiveShadow material={brassMaterial}><extrudeGeometry args={[leverShape, leverConfig]} /></mesh>
+        <mesh position={[20, 0, 1]} castShadow receiveShadow geometry={knobGeometry} material={brassMaterial} />
+      </group>
+      <mesh position={[-29, 16.5, 3.25]} geometry={collarGeometry} castShadow receiveShadow material={brassDarkMaterial} />
+      <mesh position={[ 29, 16.5, 3.25]} geometry={collarGeometry} castShadow receiveShadow material={brassDarkMaterial} />
+      <mesh position={[-29, 16.5, 3.9]} geometry={screwHeadGeometry} castShadow receiveShadow material={brassMaterial} />
+      <mesh position={[ 29, 16.5, 3.9]} geometry={screwHeadGeometry} castShadow receiveShadow material={brassMaterial} />
+      <mesh position={[-29, 16.5, 4.45]} geometry={screwSlotGeometry} castShadow receiveShadow material={steelShadowMaterial} />
+      <mesh position={[ 29, 16.5, 4.45]} geometry={screwSlotGeometry} castShadow receiveShadow material={steelShadowMaterial} />
+    </group>
+  );
+}
+
+function FitchFastenerKeep() {
+  const brassMaterial = useMemo(() => new THREE.MeshStandardMaterial({ color: '#d4af37', metalness: 0.92, roughness: 0.18 }), []);
+  const brassDarkMaterial = useMemo(() => new THREE.MeshStandardMaterial({ color: '#b38728', metalness: 0.92, roughness: 0.26 }), []);
+  const steelShadowMaterial = useMemo(() => new THREE.MeshStandardMaterial({ color: '#7a5a16', metalness: 0.7, roughness: 0.38 }), []);
+  const keepBaseShape = useMemo(() => {
+    const s = new THREE.Shape();
+    const halfW = 37.5, h = 10;
+    s.moveTo(-halfW + 4, 0); s.lineTo(halfW - 4, 0);
+    s.quadraticCurveTo(halfW, 0, halfW, 4); s.lineTo(halfW, h - 4);
+    s.quadraticCurveTo(halfW, h, halfW - 4, h); s.lineTo(-halfW + 4, h);
+    s.quadraticCurveTo(-halfW, h, -halfW, h - 4); s.lineTo(-halfW, 4);
+    s.quadraticCurveTo(-halfW, 0, -halfW + 4, 0); s.closePath();
+    const hole1 = new THREE.Path(); hole1.absarc(-29, 5, 2, 0, Math.PI*2, true);
+    const hole2 = new THREE.Path(); hole2.absarc( 29, 5, 2, 0, Math.PI*2, true);
+    const slot = new THREE.Path();
+    slot.moveTo(-9, 3); slot.lineTo(9, 3); slot.quadraticCurveTo(11, 3, 11, 5); slot.quadraticCurveTo(11, 7, 9, 7);
+    slot.lineTo(-9, 7); slot.quadraticCurveTo(-11, 7, -11, 5); slot.quadraticCurveTo(-11, 3, -9, 3); slot.closePath();
+    s.holes.push(hole1, hole2, slot); return s;
+  }, []);
+  const keepBaseConfig = useMemo(() => ({ depth: 2.8, bevelEnabled: true, bevelThickness: 0.55, bevelSize: 0.55, bevelSegments: 3, curveSegments: 32, steps: 1 }), []);
+  const collarGeometry = useMemo(() => { const g = new THREE.CylinderGeometry(3.8, 3.8, 0.8, 28); g.rotateX(Math.PI/2); return g; }, []);
+  const screwHeadGeometry = useMemo(() => { const g = new THREE.CylinderGeometry(2.9, 2.9, 1.1, 28); g.rotateX(Math.PI/2); return g; }, []);
+  const screwSlotGeometry = useMemo(() => new THREE.BoxGeometry(3.2, 0.45, 0.35), []);
+  return (
+    <group>
+      <mesh position={[0, 0, 0]} castShadow receiveShadow material={brassMaterial}>
+        <extrudeGeometry args={[keepBaseShape, keepBaseConfig]} />
+      </mesh>
+      <mesh position={[-29, 5, 2.8]} geometry={collarGeometry} castShadow receiveShadow material={brassDarkMaterial} />
+      <mesh position={[ 29, 5, 2.8]} geometry={collarGeometry} castShadow receiveShadow material={brassDarkMaterial} />
+      <mesh position={[-29, 5, 3.35]} geometry={screwHeadGeometry} castShadow receiveShadow material={brassMaterial} />
+      <mesh position={[ 29, 5, 3.35]} geometry={screwHeadGeometry} castShadow receiveShadow material={brassMaterial} />
+      <mesh position={[-29, 5, 3.9]} geometry={screwSlotGeometry} castShadow receiveShadow material={steelShadowMaterial} />
+      <mesh position={[ 29, 5, 3.9]} geometry={screwSlotGeometry} castShadow receiveShadow material={steelShadowMaterial} />
+    </group>
+  );
+}
+
+function FingerLift() {
+  const goldMaterial = useMemo(() => new THREE.MeshStandardMaterial({
+    color: '#d4af37', metalness: 0.85, roughness: 0.22,
+  }), []);
+
+  const baseShape = useMemo(() => {
+    const shape = new THREE.Shape();
+    shape.moveTo(-2.2, 0);
+    shape.lineTo(2.2, 0);
+    shape.lineTo(2.2, 1.0);
+    shape.bezierCurveTo(1.4, 1.35, 0.7, 1.45, 0, 1.45);
+    shape.bezierCurveTo(-0.7, 1.45, -1.4, 1.35, -2.2, 1.0);
+    shape.lineTo(-2.2, 0);
+    shape.closePath();
+    const hole1 = new THREE.Path(); hole1.absarc(-1.25, 0.42, 0.16, 0, Math.PI*2, true);
+    const hole2 = new THREE.Path(); hole2.absarc( 1.25, 0.42, 0.16, 0, Math.PI*2, true);
+    shape.holes.push(hole1, hole2);
+    return shape;
+  }, []);
+
+  const baseConfig = useMemo(() => ({
+    depth: 0.18, bevelEnabled: true, bevelThickness: 0.03, bevelSize: 0.03,
+    bevelSegments: 4, curveSegments: 32, steps: 1,
+  }), []);
+
+  const hookShape = useMemo(() => {
+    const shape = new THREE.Shape();
+    shape.moveTo(-1.15, 0);
+    shape.lineTo(1.15, 0);
+    shape.lineTo(1.15, 0.2);
+    shape.quadraticCurveTo(0, 0.32, -1.15, 0.2);
+    shape.lineTo(-1.15, 0);
+    shape.closePath();
+    return shape;
+  }, []);
+
+  const curve = useMemo(() => new THREE.CubicBezierCurve3(
+    new THREE.Vector3(0, 0, 0),
+    new THREE.Vector3(0, 0.6, 0.25),
+    new THREE.Vector3(0, 1.4, 0.9),
+    new THREE.Vector3(0, 0.9, 1.7)
+  ), []);
+
+  const hookConfig = useMemo(() => ({
+    steps: 40, extrudePath: curve, bevelEnabled: false, curveSegments: 32,
+  }), [curve]);
+
+  const collarGeometry = useMemo(() => {
+    const g = new THREE.CylinderGeometry(0.24, 0.24, 0.04, 32);
+    g.rotateX(Math.PI / 2);
+    return g;
+  }, []);
+
+  return (
+    <group rotation={[0, 0, 0]}>
+      <mesh castShadow receiveShadow>
+        <extrudeGeometry args={[baseShape, baseConfig]} />
+        <primitive object={goldMaterial} attach="material" />
+      </mesh>
+      <mesh position={[0, 0.98, 0.08]} castShadow receiveShadow>
+        <extrudeGeometry args={[hookShape, hookConfig]} />
+        <primitive object={goldMaterial} attach="material" />
+      </mesh>
+      <mesh position={[-1.25, 0.42, 0.11]} castShadow receiveShadow geometry={collarGeometry}>
+        <meshStandardMaterial color="#c39a2e" metalness={0.9} roughness={0.25} />
+      </mesh>
+      <mesh position={[1.25, 0.42, 0.11]} castShadow receiveShadow geometry={collarGeometry}>
+        <meshStandardMaterial color="#c39a2e" metalness={0.9} roughness={0.25} />
+      </mesh>
     </group>
   );
 }
