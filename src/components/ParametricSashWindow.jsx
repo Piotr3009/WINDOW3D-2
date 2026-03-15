@@ -538,16 +538,17 @@ function LowerBottomRail({ width, height, depth, yCenter, stileWidth, coreMateri
 }
 
 const BAR_PATTERNS = {
-  'none':        { h: 0, v: 0 },
-  '2x2':        { h: 0, v: 1 },
-  '3x3':        { h: 0, v: 2 },
-  '4x4':        { h: 1, v: 1 },
-  '6x6':        { h: 1, v: 2 },
-  '9x9':        { h: 2, v: 2 },
+  'none':   { h: 0, v: 0 },
+  '2x2':   { h: 0, v: 1 },
+  '3x3':   { h: 0, v: 2 },
+  '4x4':   { h: 1, v: 1 },
+  '6x6':   { h: 1, v: 2 },
+  '9x9':   { h: 2, v: 2 },
+  'custom': null,
 };
 
-function GlazingBars({ clearWidth, clearHeight, glassDepth, barPattern = 'none', material }) {
-  const pattern = BAR_PATTERNS[barPattern] || BAR_PATTERNS['none'];
+function GlazingBars({ clearWidth, clearHeight, glassDepth, barPattern = 'none', customBars = [], material }) {
+  const pattern = BAR_PATTERNS[barPattern];
   const barW = mm(22);
   const barH = mm(16.5);
   const barTop = mm(2);
@@ -597,10 +598,9 @@ function GlazingBars({ clearWidth, clearHeight, glassDepth, barPattern = 'none',
     return g;
   }, [clearWidth, trapezoidHGeom]);
 
-  const drop = mm(2);
-  const sqH = mm(2);
-
   const ovoloIntShape = useMemo(() => {
+    const drop = mm(2);
+    const sqH = mm(2);
     const shape = new THREE.Shape();
     shape.moveTo(-barW / 2, 0);
     shape.quadraticCurveTo(-barW / 2, barH - drop - sqH, -barTop / 2, barH - sqH);
@@ -613,6 +613,8 @@ function GlazingBars({ clearWidth, clearHeight, glassDepth, barPattern = 'none',
   }, []);
 
   const ovoloIntHShape = useMemo(() => {
+    const drop = mm(2);
+    const sqH = mm(2);
     const shape = new THREE.Shape();
     shape.moveTo(0, -barW / 2);
     shape.quadraticCurveTo(barH - drop - sqH, -barW / 2, barH - sqH, -barTop / 2);
@@ -651,6 +653,14 @@ function GlazingBars({ clearWidth, clearHeight, glassDepth, barPattern = 'none',
   }, [clearWidth, ovoloIntHShape]);
 
   const bars = useMemo(() => {
+    if (barPattern === 'custom') {
+      return customBars.map(b => ({
+        type: b.type,
+        x: b.type === 'v' ? -clearWidth / 2 + mm(b.mm) : 0,
+        y: b.type === 'h' ? -clearHeight / 2 + mm(b.mm) : 0,
+      }));
+    }
+    if (!pattern) return [];
     const items = [];
     const { h, v } = pattern;
     for (let i = 1; i <= v; i++) {
@@ -662,7 +672,7 @@ function GlazingBars({ clearWidth, clearHeight, glassDepth, barPattern = 'none',
       items.push({ type: 'h', x: 0, y });
     }
     return items;
-  }, [clearWidth, clearHeight, pattern.h, pattern.v]);
+  }, [clearWidth, clearHeight, barPattern, customBars, pattern]);
 
   if (bars.length === 0) return null;
 
@@ -702,6 +712,7 @@ function Sash({
   glassThickness = 24,
   flipChamfer = false,
   barPattern = 'none',
+  customBars = [],
 }) {
   const coreMaterial = useMemo(
     () =>
@@ -718,25 +729,25 @@ function Sash({
   const externalBeadMaterial = useMemo(
     () =>
       new THREE.MeshPhysicalMaterial({
-        color: '#00bcd4',
+        color,
         roughness: 0.38,
         metalness: 0.04,
         clearcoat: 0.25,
         clearcoatRoughness: 0.1,
       }),
-    []
+    [color]
   );
 
   const internalBeadMaterial = useMemo(
     () =>
       new THREE.MeshPhysicalMaterial({
-        color: '#d81b60',
+        color,
         roughness: 0.38,
         metalness: 0.04,
         clearcoat: 0.25,
         clearcoatRoughness: 0.1,
       }),
-    []
+    [color]
   );
 
   const w = mm(width);
@@ -860,6 +871,7 @@ function Sash({
           clearHeight={clearHeight}
           glassDepth={glassD}
           barPattern={barPattern}
+          customBars={customBars}
           material={coreMaterial}
         />
       </group>
@@ -1413,7 +1425,7 @@ function JambWithPartingBead({
   );
 }
 
-function ExternalBoxElement({ height, side = 'right', position }) {
+function ExternalBoxElement({ height, side = 'right', position, color = '#f0e6d3' }) {
   const geometry = useMemo(() => {
     const shape = new THREE.Shape();
     shape.moveTo(mm(20), 0);
@@ -1436,7 +1448,7 @@ function ExternalBoxElement({ height, side = 'right', position }) {
   }, [height]);
 
   const extMaterial = useMemo(() => new THREE.MeshPhysicalMaterial({
-    color: '#c8a96e',
+    color,
     roughness: 0.5,
     metalness: 0.0,
     clearcoat: 0.2,
@@ -1444,7 +1456,7 @@ function ExternalBoxElement({ height, side = 'right', position }) {
     polygonOffset: true,
     polygonOffsetFactor: -2,
     polygonOffsetUnits: -2,
-  }), []);
+  }), [color]);
 
   return (
     <group
@@ -1459,7 +1471,7 @@ function ExternalBoxElement({ height, side = 'right', position }) {
   );
 }
 
-function InternalBoxElement({ height, side = 'right', position }) {
+function InternalBoxElement({ height, side = 'right', position, color = '#f0e6d3' }) {
   const geometry = useMemo(() => {
     const shape = new THREE.Shape();
     shape.moveTo(0, 0);
@@ -1479,7 +1491,7 @@ function InternalBoxElement({ height, side = 'right', position }) {
   }, [height]);
 
   const intMaterial = useMemo(() => new THREE.MeshPhysicalMaterial({
-    color: '#e8c49a',
+    color,
     roughness: 0.5,
     metalness: 0.0,
     clearcoat: 0.2,
@@ -1487,7 +1499,7 @@ function InternalBoxElement({ height, side = 'right', position }) {
     polygonOffset: true,
     polygonOffsetFactor: -2,
     polygonOffsetUnits: -2,
-  }), []);
+  }), [color]);
 
   return (
     <group position={position} scale={[side === 'left' ? -1 : 1, 1, 1]}>
@@ -1498,7 +1510,7 @@ function InternalBoxElement({ height, side = 'right', position }) {
   );
 }
 
-function StaffBeadHorizontal({ width, position, flipZ = false }) {
+function StaffBeadHorizontal({ width, position, flipZ = false, color = '#f0e6d3' }) {
   const geometry = useMemo(() => {
     const r = mm(8.5);
     const bw = mm(17);
@@ -1525,12 +1537,12 @@ function StaffBeadHorizontal({ width, position, flipZ = false }) {
   }, [width]);
 
   const staffMaterial = useMemo(() => new THREE.MeshPhysicalMaterial({
-    color: '#1565c0',
+    color,
     roughness: 0.4,
     metalness: 0.0,
     clearcoat: 0.3,
     clearcoatRoughness: 0.1,
-  }), []);
+  }), [color]);
 
   return (
     <group position={position} scale={[1, 1, flipZ ? -1 : 1]}>
@@ -1541,7 +1553,7 @@ function StaffBeadHorizontal({ width, position, flipZ = false }) {
   );
 }
 
-function StaffBead({ height, position, side = 'right' }) {
+function StaffBead({ height, position, side = 'right', color = '#f0e6d3' }) {
   const geometry = useMemo(() => {
     const r = mm(8.5);
     const w = mm(17);
@@ -1567,12 +1579,12 @@ function StaffBead({ height, position, side = 'right' }) {
   }, [height]);
 
   const staffMaterial = useMemo(() => new THREE.MeshPhysicalMaterial({
-    color: '#1565c0',
+    color,
     roughness: 0.4,
     metalness: 0.0,
     clearcoat: 0.3,
     clearcoatRoughness: 0.1,
-  }), []);
+  }), [color]);
 
   return (
     <group position={position} rotation={[0, Math.PI, 0]} scale={[side === 'left' ? -1 : 1, 1, 1]}>
@@ -1642,43 +1654,46 @@ export default function ParametricSashWindow({
   showGuides = true,
   upperBars = 'none',
   lowerBars = 'none',
+  upperCustomBars = [],
+  lowerCustomBars = [],
   pulleyDemoTravel = 0,
+  woodColor = '#f0e6d3',
 }) {
   const jambMaterial = useMemo(
     () =>
       new THREE.MeshPhysicalMaterial({
-        color: '#2e7d32',
+        color: woodColor,
         roughness: 0.4,
         metalness: 0.03,
         clearcoat: 0.32,
         clearcoatRoughness: 0.11,
       }),
-    []
+    [woodColor]
   );
 
   const beadMaterial = useMemo(
     () =>
       new THREE.MeshPhysicalMaterial({
-        color: '#e65100',
+        color: woodColor,
         roughness: 0.5,
         metalness: 0.02,
         clearcoat: 0.18,
         clearcoatRoughness: 0.14,
       }),
-    []
+    [woodColor]
   );
 
   const sillMaterial = useMemo(
     () =>
       new THREE.MeshPhysicalMaterial({
-        color: '#c62828',
+        color: woodColor,
         roughness: 0.42,
         metalness: 0.02,
         clearcoat: 0.22,
         clearcoatRoughness: 0.12,
         side: THREE.DoubleSide,
       }),
-    []
+    [woodColor]
   );
 
   const pulleyPlateMaterial = useMemo(
@@ -1815,78 +1830,60 @@ export default function ParametricSashWindow({
         height={h + mm(52)}
         side="right"
         position={[w / 2 - mm(100) + mm(52), jambOriginY - h / 2, bd / 2 - mm(17)]}
+        color={woodColor}
       />
       <ExternalBoxElement
         height={h + mm(52)}
         side="left"
         position={[-w / 2 + mm(100) - mm(52), jambOriginY - h / 2, bd / 2 - mm(17)]}
+        color={woodColor}
       />
 
       <StaffBeadHorizontal
         width={w + mm(104) - mm(160)}
         position={[0, jambOriginY - h / 2 + jambEmbedIntoSill, -bd / 2 + mm(80) - mm(65) - mm(17) - mm(17) + mm(34)]}
         flipZ={false}
+        color={woodColor}
       />
       <StaffBeadHorizontal
         width={w + mm(104) - mm(160)}
         position={[0, jambOriginY + h / 2 + mm(52) - mm(80) - mm(17), -bd / 2 + mm(80) - mm(65) - mm(17)]}
         flipZ={true}
+        color={woodColor}
       />
 
       <StaffBead
         height={h + mm(52) - jambEmbedIntoSill - mm(80)}
         side="right"
         position={[w / 2 + mm(52) - mm(80), jambOriginY - h / 2 + jambEmbedIntoSill, -bd / 2 + mm(80) - mm(65) - mm(17)]}
+        color={woodColor}
       />
       <StaffBead
         height={h + mm(52) - jambEmbedIntoSill - mm(80)}
         side="left"
         position={[-w / 2 - mm(52) + mm(80), jambOriginY - h / 2 + jambEmbedIntoSill, -bd / 2 + mm(80) - mm(65) - mm(17)]}
+        color={woodColor}
       />
       <InternalBoxElement
         height={h + mm(52) - jambEmbedIntoSill}
         side="right"
         position={[w / 2 + mm(52) - mm(80), jambOriginY - h / 2 + jambEmbedIntoSill, -bd / 2]}
+        color={woodColor}
       />
       <InternalBoxElement
         height={h + mm(52) - jambEmbedIntoSill}
         side="left"
         position={[-w / 2 - mm(52) + mm(80), jambOriginY - h / 2 + jambEmbedIntoSill, -bd / 2]}
+        color={woodColor}
       />
-      <mesh
-        position={[0, jambOriginY + h / 2 + mm(52) - mm(40), -bd / 2 + mm(8.5)]}
-        castShadow
-        receiveShadow
-      >
+      <mesh position={[0, jambOriginY + h / 2 + mm(52) - mm(40), -bd / 2 + mm(8.5)]} castShadow receiveShadow>
         <boxGeometry args={[w + mm(104) - mm(160), mm(80), mm(17)]} />
-        <meshPhysicalMaterial
-          color="#e8c49a"
-          roughness={0.5}
-          metalness={0.0}
-          clearcoat={0.2}
-          clearcoatRoughness={0.12}
-          polygonOffset={true}
-          polygonOffsetFactor={-2}
-          polygonOffsetUnits={-2}
-        />
+        <meshPhysicalMaterial color={woodColor} roughness={0.5} metalness={0.0} clearcoat={0.2} clearcoatRoughness={0.12} polygonOffset={true} polygonOffsetFactor={-2} polygonOffsetUnits={-2} />
       </mesh>
 
-      <mesh
-        position={[0, jambOriginY + h / 2 + mm(50) - mm(48), bd / 2 - mm(8.5)]}
-        castShadow
-        receiveShadow
-      >
+      <mesh position={[0, jambOriginY + h / 2 + mm(50) - mm(48), bd / 2 - mm(8.5)]} castShadow receiveShadow>
         <boxGeometry args={[w - mm(96), mm(100), mm(17)]} />
-        <meshPhysicalMaterial
-          color="#c8a96e"
-          roughness={0.5}
-          metalness={0.0}
-          clearcoat={0.2}
-          clearcoatRoughness={0.12}
-          polygonOffset={true}
-          polygonOffsetFactor={-2}
-          polygonOffsetUnits={-2}
-        />
+        <meshPhysicalMaterial color={woodColor} roughness={0.5} metalness={0.0} clearcoat={0.2} clearcoatRoughness={0.12} polygonOffset={true} polygonOffsetFactor={-2} polygonOffsetUnits={-2} />
       </mesh>
 
       <Sash
@@ -1898,10 +1895,11 @@ export default function ParametricSashWindow({
         bottomRail={config.upperMeetingRail}
         zOffset={trackRearZ}
         yOffset={yTopClosed - mm(upperOpeningDrop)}
-        color="#f9a825"
+        color={woodColor}
         glassThickness={config.glassUnitThickness}
         flipChamfer={false}
         barPattern={upperBars}
+        customBars={upperCustomBars}
       />
 
       <Sash
@@ -1913,11 +1911,12 @@ export default function ParametricSashWindow({
         bottomRail={config.lowerBottomRail}
         zOffset={trackFrontZ}
         yOffset={yBottomClosed + mm(lowerOpeningLift)}
-        color="#7b1fa2"
+        color={woodColor}
         profiledBottom={true}
         glassThickness={config.glassUnitThickness}
         flipChamfer={false}
         barPattern={lowerBars}
+        customBars={lowerCustomBars}
       />
 
       {showGuides && (
