@@ -124,6 +124,148 @@ function RalInput({ onColor }) {
   );
 }
 
+const SWATCHES = [
+  { name: 'Pure White', hex: '#F4F4F2' },
+  { name: 'Jet Black', hex: '#1C1C1C' },
+  { name: 'Anthracite', hex: '#2E3A3F' },
+  { name: 'Olive Green', hex: '#4A4F3B' },
+  { name: 'Off-White', hex: '#F0EEE8' },
+  { name: 'Cream', hex: '#EDE8D8' },
+  { name: 'Burgundy', hex: '#6B1A2A' },
+  { name: 'Royal Blue', hex: '#1A3060' },
+  { name: 'Oak', hex: '#C8853A' },
+];
+
+function ColorPicker({ label, value, onChange, inputId }) {
+  return (
+    <div style={{ marginBottom: '12px' }}>
+      <div style={{ fontSize: '12px', color: 'var(--color-text-secondary)', marginBottom: '6px', fontWeight: 500 }}>{label}</div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+        <div style={{ width: '28px', height: '28px', borderRadius: '6px', backgroundColor: value, border: '2px solid rgba(0,0,0,0.15)', flexShrink: 0 }} />
+        <span style={{ fontSize: '12px', color: 'var(--color-text-secondary)', fontFamily: 'monospace' }}>{value.toUpperCase()}</span>
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '6px', marginBottom: '8px' }}>
+        {SWATCHES.map(({ name, hex }) => (
+          <div key={hex} onClick={() => onChange(hex)} title={name}
+            style={{ backgroundColor: hex, borderRadius: '6px', aspectRatio: '1', cursor: 'pointer',
+              border: value === hex ? '3px solid #1A3060' : '2px solid rgba(0,0,0,0.12)', boxSizing: 'border-box' }}
+          />
+        ))}
+        <div onClick={() => document.getElementById(inputId).click()} title="Custom"
+          style={{ borderRadius: '6px', aspectRatio: '1', cursor: 'pointer',
+            border: '2px dashed rgba(0,0,0,0.3)', display: 'flex', alignItems: 'center',
+            justifyContent: 'center', fontSize: '18px', color: 'rgba(0,0,0,0.4)', boxSizing: 'border-box' }}>+</div>
+        <input id={inputId} type="color" value={value} onChange={(e) => onChange(e.target.value)}
+          style={{ position: 'absolute', opacity: 0, pointerEvents: 'none' }} />
+      </div>
+      <label className="select-wrap">
+        <span>RAL</span>
+        <select value="" onChange={(e) => e.target.value && onChange(e.target.value)}>
+          <option value="">— RAL —</option>
+          <optgroup label="Whites &amp; Creams">
+            <option value="#FFFFFF">9010 Pure White</option><option value="#F6F6F6">9016 Traffic White</option>
+            <option value="#F4F4F4">9003 Signal White</option><option value="#FDF4E3">9001 Cream White</option>
+            <option value="#E7EBDA">9002 Grey White</option><option value="#E6D690">1015 Light Ivory</option>
+            <option value="#C2B078">1001 Beige</option><option value="#C6A664">1002 Sand Yellow</option>
+          </optgroup>
+          <optgroup label="Greys">
+            <option value="#D7D7D7">7035 Light Grey</option><option value="#B5B8B1">7038 Agate Grey</option>
+            <option value="#8D948D">7042 Traffic Grey A</option><option value="#7D7F7D">7037 Dusty Grey</option>
+            <option value="#78858B">7000 Squirrel Grey</option><option value="#9EA0A1">7004 Signal Grey</option>
+            <option value="#6C7059">7005 Mouse Grey</option><option value="#474A51">7024 Graphite Grey</option>
+            <option value="#293133">7016 Anthracite Grey</option><option value="#23282B">7021 Black Grey</option>
+            <option value="#434750">7015 Slate Grey</option><option value="#4E5754">7012 Basalt Grey</option>
+          </optgroup>
+          <optgroup label="Blacks">
+            <option value="#0A0A0A">9005 Jet Black</option><option value="#1C2023">9011 Graphite Black</option>
+            <option value="#1E1E1E">9017 Traffic Black</option><option value="#282828">9004 Signal Black</option>
+          </optgroup>
+          <optgroup label="Greens">
+            <option value="#31372B">6009 Fir Green</option><option value="#2F4538">6005 Moss Green</option>
+            <option value="#343B29">6007 Bottle Green</option><option value="#1F3A3D">6004 Blue Green</option>
+            <option value="#4A4F3B">6003 Olive Green</option><option value="#587246">6011 Reseda Green</option>
+            <option value="#35682D">6010 Grass Green</option><option value="#1E5945">6016 Turquoise Green</option>
+          </optgroup>
+          <optgroup label="Blues">
+            <option value="#1E2460">5002 Ultramarine Blue</option><option value="#1D1E33">5004 Black Blue</option>
+            <option value="#1B2A4A">5011 Steel Blue</option><option value="#2271B3">5015 Sky Blue</option>
+            <option value="#063971">5017 Traffic Blue</option><option value="#3B83BD">5012 Light Blue</option>
+            <option value="#354D73">5000 Violet Blue</option><option value="#49678D">5023 Distant Blue</option>
+          </optgroup>
+          <optgroup label="Reds">
+            <option value="#AF2B1E">3000 Flame Red</option><option value="#9B111E">3003 Ruby Red</option>
+            <option value="#75151E">3004 Purple Red</option><option value="#5E2129">3005 Wine Red</option>
+            <option value="#D53032">3018 Strawberry Red</option><option value="#CC0605">3020 Traffic Red</option>
+          </optgroup>
+          <optgroup label="Browns">
+            <option value="#955F20">8001 Ochre Brown</option><option value="#6F4F28">8008 Olive Brown</option>
+            <option value="#6F3B2A">8011 Nut Brown</option><option value="#4E3B31">8028 Terra Brown</option>
+            <option value="#45322E">8017 Chocolate Brown</option><option value="#382C1E">8014 Sepia Brown</option>
+          </optgroup>
+          <optgroup label="Yellows &amp; Oranges">
+            <option value="#E5BE01">1003 Signal Yellow</option><option value="#F4A900">1028 Melon Yellow</option>
+            <option value="#ED760E">2000 Yellow Orange</option><option value="#FF7514">2003 Pastel Orange</option>
+          </optgroup>
+        </select>
+      </label>
+      <label className="select-wrap">
+        <span>Farrow &amp; Ball</span>
+        <select value="" onChange={(e) => e.target.value && onChange(e.target.value)}>
+          <option value="">— F&amp;B —</option>
+          <optgroup label="Whites">
+            <option value="#F6F4EE">All White 2005</option><option value="#F4F0E4">James White 2010</option>
+            <option value="#EEEADE">Pointing 2003</option><option value="#EDE8D8">Cream 2012</option>
+            <option value="#EAE4D4">White Tie 2002</option><option value="#E8E2CC">String 8</option>
+            <option value="#F2EEE4">Wimborne White 239</option><option value="#EDE6D4">Slipper Satin 2004</option>
+            <option value="#EAE0C8">Skimming Stone 241</option><option value="#F0EAD8">New White 59</option>
+          </optgroup>
+          <optgroup label="Neutrals &amp; Stones">
+            <option value="#D5C9B0">Elephant's Breath 229</option><option value="#C8BC9E">Mole's Breath 276</option>
+            <option value="#C2B49A">Bone 15</option><option value="#BEB49A">Hardwick White 5</option>
+            <option value="#B4A890">Purbeck Stone 275</option><option value="#AFA08A">Joa's White 226</option>
+            <option value="#A89880">Savage Ground 213</option><option value="#9E8E70">Dead Salmon 28</option>
+            <option value="#8E7E68">Buff 20</option><option value="#7A6A54">Oxford Stone 264</option>
+            <option value="#6C5C46">Sand II 40</option><option value="#645448">Sand III 21</option>
+            <option value="#5C4C3A">Mouse's Back 40</option>
+          </optgroup>
+          <optgroup label="Greys">
+            <option value="#B8B8B0">Mizzle 266</option><option value="#A8A8A0">Pigeon 25</option>
+            <option value="#989890">Lamp Room Gray 88</option><option value="#888880">Pavilion Gray 242</option>
+            <option value="#787870">Worsted 284</option><option value="#686860">Plummett 272</option>
+            <option value="#383830">Down Pipe 26</option><option value="#2C3531">Railings 31</option>
+            <option value="#3B3D38">Off-Black 57</option><option value="#2E3028">Pitch Black 256</option>
+          </optgroup>
+          <optgroup label="Blues">
+            <option value="#1B3A5C">Hague Blue 30</option><option value="#233B5A">Stiffkey Blue 281</option>
+            <option value="#2A4870">Inchyra Blue 289</option><option value="#3A5878">Prussian Blue 232</option>
+            <option value="#4A6888">Lulworth Blue 89</option><option value="#5A7898">Parma Gray 27</option>
+            <option value="#7898B8">Pale Powder 204</option><option value="#8898A8">Borrowed Light 235</option>
+          </optgroup>
+          <optgroup label="Greens">
+            <option value="#4A5240">Calke Green 34</option><option value="#3A4A30">Viridian 214</option>
+            <option value="#4A5A3A">Chappell Green 83</option><option value="#6A7A5A">Saxon Green 80</option>
+            <option value="#7A8A6A">Lichen 19</option><option value="#526B58">Card Room Green 79</option>
+            <option value="#3D5A42">Pea Green 33</option>
+          </optgroup>
+          <optgroup label="Reds &amp; Pinks">
+            <option value="#7A1F2E">Rectory Red 217</option><option value="#5C1A25">Incarnadine 248</option>
+            <option value="#8A2A3A">Blazer 212</option><option value="#C86070">Cinder Rose 246</option>
+            <option value="#E88A96">Pink Ground 202</option>
+          </optgroup>
+          <optgroup label="Yellows &amp; Oranges">
+            <option value="#D4A84B">India Yellow 66</option><option value="#C49840">Sudbury Yellow 51</option>
+            <option value="#D4884A">Setting Plaster 231</option><option value="#A86030">Charlotte's Locks 268</option>
+          </optgroup>
+        </select>
+      </label>
+      <label className="control">
+        <div className="control__row"><span>RAL number</span></div>
+        <RalInput onColor={onChange} />
+      </label>
+    </div>
+  );
+}
+
 function Scene({ config }) {
   const [hovered, setHovered] = useState(false);
 
@@ -202,6 +344,16 @@ export default function App() {
   const [showGuides, setShowGuides] = useState(true);
   const [boxType, setBoxType] = useState('standard');
   const [woodColor, setWoodColor] = useState('#f0e6d3');
+  const [woodColorExt, setWoodColorExt] = useState('#f0e6d3');
+  const [woodColorInt, setWoodColorInt] = useState('#f0e6d3');
+  const [sameColor, setSameColor] = useState(true);
+
+  const setColor = (hex) => {
+    setWoodColor(hex);
+    if (sameColor) { setWoodColorExt(hex); setWoodColorInt(hex); }
+  };
+  const setColorExt = (hex) => { setWoodColorExt(hex); };
+  const setColorInt = (hex) => { setWoodColorInt(hex); };
   const [upperBars, setUpperBars] = useState('none');
   const [lowerBars, setLowerBars] = useState('none');
   const [sameBars, setSameBars] = useState(true);
@@ -226,8 +378,10 @@ export default function App() {
       upperCustomBars,
       lowerCustomBars,
       woodColor,
+      woodColorExt: sameColor ? woodColor : woodColorExt,
+      woodColorInt: sameColor ? woodColor : woodColorInt,
     }),
-    [width, height, opening, upperOpening, autoRotate, showGuides, boxType, upperBars, lowerBars, upperCustomBars, lowerCustomBars, woodColor],
+    [width, height, opening, upperOpening, autoRotate, showGuides, boxType, upperBars, lowerBars, upperCustomBars, lowerCustomBars, woodColor, woodColorExt, woodColorInt, sameColor],
   );
 
   return (
@@ -397,234 +551,19 @@ export default function App() {
 
         <div className="card">
           <h2>Colour</h2>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '8px', marginBottom: '12px' }}>
-            {[
-              { name: 'Pure White', hex: '#F4F4F2' },
-              { name: 'Jet Black', hex: '#1C1C1C' },
-              { name: 'Anthracite', hex: '#2E3A3F' },
-              { name: 'Olive Green', hex: '#4A4F3B' },
-              { name: 'Off-White', hex: '#F0EEE8' },
-              { name: 'Cream', hex: '#EDE8D8' },
-              { name: 'Burgundy', hex: '#6B1A2A' },
-              { name: 'Royal Blue', hex: '#1A3060' },
-              { name: 'Oak', hex: '#C8853A' },
-            ].map(({ name, hex }) => (
-              <div key={hex} onClick={() => setWoodColor(hex)}
-                title={name}
-                style={{
-                  backgroundColor: hex,
-                  borderRadius: '8px',
-                  aspectRatio: '1',
-                  cursor: 'pointer',
-                  border: woodColor === hex ? '3px solid #1A3060' : '2px solid rgba(0,0,0,0.12)',
-                  boxSizing: 'border-box',
-                }}
-              />
-            ))}
-            <div onClick={() => document.getElementById('custom-color-input').click()}
-              title="Custom color"
-              style={{
-                borderRadius: '8px',
-                aspectRatio: '1',
-                cursor: 'pointer',
-                border: '2px dashed rgba(0,0,0,0.3)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: '20px', color: 'rgba(0,0,0,0.4)',
-                boxSizing: 'border-box',
-              }}
-            >+</div>
-            <input id="custom-color-input" type="color" value={woodColor}
-              onChange={(e) => setWoodColor(e.target.value)}
-              style={{ position: 'absolute', opacity: 0, pointerEvents: 'none' }} />
-          </div>
-
-          <label className="select-wrap">
-            <span>RAL colour</span>
-            <select value="" onChange={(e) => e.target.value && setWoodColor(e.target.value)}>
-              <option value="">— select RAL —</option>
-              <optgroup label="Whites &amp; Creams">
-                <option value="#FFFFFF">RAL 9010 Pure White</option>
-                <option value="#F6F6F6">RAL 9016 Traffic White</option>
-                <option value="#F4F4F4">RAL 9003 Signal White</option>
-                <option value="#FDF4E3">RAL 9001 Cream White</option>
-                <option value="#E7EBDA">RAL 9002 Grey White</option>
-                <option value="#E6D690">RAL 1015 Light Ivory</option>
-                <option value="#EAE6CA">RAL 1013 Pearl White</option>
-                <option value="#C2B078">RAL 1001 Beige</option>
-                <option value="#C6A664">RAL 1002 Sand Yellow</option>
-              </optgroup>
-              <optgroup label="Greys">
-                <option value="#D7D7D7">RAL 7035 Light Grey</option>
-                <option value="#B5B8B1">RAL 7038 Agate Grey</option>
-                <option value="#8D948D">RAL 7042 Traffic Grey A</option>
-                <option value="#7D7F7D">RAL 7037 Dusty Grey</option>
-                <option value="#78858B">RAL 7000 Squirrel Grey</option>
-                <option value="#8A9597">RAL 7001 Silver Grey</option>
-                <option value="#9EA0A1">RAL 7004 Signal Grey</option>
-                <option value="#6C7059">RAL 7005 Mouse Grey</option>
-                <option value="#474A51">RAL 7024 Graphite Grey</option>
-                <option value="#293133">RAL 7016 Anthracite Grey</option>
-                <option value="#23282B">RAL 7021 Black Grey</option>
-                <option value="#434750">RAL 7015 Slate Grey</option>
-                <option value="#4E5754">RAL 7012 Basalt Grey</option>
-                <option value="#4C514A">RAL 7010 Tarpaulin Grey</option>
-              </optgroup>
-              <optgroup label="Blacks">
-                <option value="#0A0A0A">RAL 9005 Jet Black</option>
-                <option value="#1C2023">RAL 9011 Graphite Black</option>
-                <option value="#1E1E1E">RAL 9017 Traffic Black</option>
-                <option value="#282828">RAL 9004 Signal Black</option>
-              </optgroup>
-              <optgroup label="Greens">
-                <option value="#31372B">RAL 6009 Fir Green</option>
-                <option value="#2F4538">RAL 6005 Moss Green</option>
-                <option value="#343B29">RAL 6007 Bottle Green</option>
-                <option value="#1F3A3D">RAL 6004 Blue Green</option>
-                <option value="#4A4F3B">RAL 6003 Olive Green</option>
-                <option value="#424632">RAL 6013 Reed Green</option>
-                <option value="#587246">RAL 6011 Reseda Green</option>
-                <option value="#35682D">RAL 6010 Grass Green</option>
-                <option value="#4C9141">RAL 6017 May Green</option>
-                <option value="#308446">RAL 6024 Traffic Green</option>
-                <option value="#1E5945">RAL 6016 Turquoise Green</option>
-                <option value="#3F888F">RAL 5018 Turquoise Blue</option>
-              </optgroup>
-              <optgroup label="Blues">
-                <option value="#1E2460">RAL 5002 Ultramarine Blue</option>
-                <option value="#1D1E33">RAL 5004 Black Blue</option>
-                <option value="#1B2A4A">RAL 5011 Steel Blue</option>
-                <option value="#2271B3">RAL 5015 Sky Blue</option>
-                <option value="#063971">RAL 5017 Traffic Blue</option>
-                <option value="#3B83BD">RAL 5012 Light Blue</option>
-                <option value="#1B5583">RAL 5019 Capri Blue</option>
-                <option value="#354D73">RAL 5000 Violet Blue</option>
-                <option value="#49678D">RAL 5023 Distant Blue</option>
-                <option value="#5D9B9B">RAL 5024 Pastel Blue</option>
-              </optgroup>
-              <optgroup label="Reds &amp; Pinks">
-                <option value="#AF2B1E">RAL 3000 Flame Red</option>
-                <option value="#9B111E">RAL 3003 Ruby Red</option>
-                <option value="#75151E">RAL 3004 Purple Red</option>
-                <option value="#5E2129">RAL 3005 Wine Red</option>
-                <option value="#B32821">RAL 3016 Coral Red</option>
-                <option value="#D53032">RAL 3018 Strawberry Red</option>
-                <option value="#CC0605">RAL 3020 Traffic Red</option>
-              </optgroup>
-              <optgroup label="Browns">
-                <option value="#955F20">RAL 8001 Ochre Brown</option>
-                <option value="#6F4F28">RAL 8008 Olive Brown</option>
-                <option value="#6F3B2A">RAL 8011 Nut Brown</option>
-                <option value="#59351F">RAL 8007 Fawn Brown</option>
-                <option value="#4E3B31">RAL 8028 Terra Brown</option>
-                <option value="#45322E">RAL 8017 Chocolate Brown</option>
-                <option value="#382C1E">RAL 8014 Sepia Brown</option>
-              </optgroup>
-              <optgroup label="Yellows &amp; Oranges">
-                <option value="#E5BE01">RAL 1003 Signal Yellow</option>
-                <option value="#F8F32B">RAL 1018 Zinc Yellow</option>
-                <option value="#F4A900">RAL 1028 Melon Yellow</option>
-                <option value="#ED760E">RAL 2000 Yellow Orange</option>
-                <option value="#FF7514">RAL 2003 Pastel Orange</option>
-                <option value="#F44611">RAL 2004 Pure Orange</option>
-              </optgroup>
-            </select>
-          </label>
-
-          <label className="select-wrap">
-            <span>Farrow &amp; Ball</span>
-            <select value="" onChange={(e) => e.target.value && setWoodColor(e.target.value)}>
-              <option value="">— select F&amp;B —</option>
-              <optgroup label="Whites">
-                <option value="#F6F4EE">All White 2005</option>
-                <option value="#F4F0E4">James White 2010</option>
-                <option value="#EEEADE">Pointing 2003</option>
-                <option value="#EDE8D8">Cream 2012</option>
-                <option value="#EAE4D4">White Tie 2002</option>
-                <option value="#E8E2CC">String 8</option>
-                <option value="#F2EEE4">Wimborne White 239</option>
-                <option value="#EDE6D4">Slipper Satin 2004</option>
-                <option value="#EAE0C8">Skimming Stone 241</option>
-                <option value="#F0EAD8">New White 59</option>
-              </optgroup>
-              <optgroup label="Neutrals &amp; Stones">
-                <option value="#D5C9B0">Elephant's Breath 229</option>
-                <option value="#C8BC9E">Mole's Breath 276</option>
-                <option value="#C2B49A">Bone 15</option>
-                <option value="#BEB49A">Hardwick White 5</option>
-                <option value="#B4A890">Purbeck Stone 275</option>
-                <option value="#AFA08A">Joa's White 226</option>
-                <option value="#A89880">Savage Ground 213</option>
-                <option value="#9E8E70">Dead Salmon 28</option>
-                <option value="#9A8870">Shaded White 201</option>
-                <option value="#8E7E68">Buff 20</option>
-                <option value="#7A6A54">Oxford Stone 264</option>
-                <option value="#6C5C46">Sand II 40</option>
-                <option value="#645448">Sand III 21</option>
-                <option value="#5C4C3A">Mouse's Back 40</option>
-              </optgroup>
-              <optgroup label="Greys">
-                <option value="#B8B8B0">Mizzle 266</option>
-                <option value="#A8A8A0">Pigeon 25</option>
-                <option value="#989890">Lamp Room Gray 88</option>
-                <option value="#888880">Pavilion Gray 242</option>
-                <option value="#787870">Worsted 284</option>
-                <option value="#686860">Plummett 272</option>
-                <option value="#585850">Brassica 271</option>
-                <option value="#484840">Mole's Breath 276</option>
-                <option value="#383830">Down Pipe 26</option>
-                <option value="#2C3531">Railings 31</option>
-                <option value="#3B3D38">Off-Black 57</option>
-                <option value="#2E3028">Pitch Black 256</option>
-              </optgroup>
-              <optgroup label="Blues">
-                <option value="#1B3A5C">Hague Blue 30</option>
-                <option value="#233B5A">Stiffkey Blue 281</option>
-                <option value="#2A4870">Inchyra Blue 289</option>
-                <option value="#2C4870">Pitch Blue 220</option>
-                <option value="#3A5878">Prussian Blue 232</option>
-                <option value="#4A6888">Lulworth Blue 89</option>
-                <option value="#5A7898">Parma Gray 27</option>
-                <option value="#6A88A8">Mizzle Light</option>
-                <option value="#7898B8">Pale Powder 204</option>
-                <option value="#8898A8">Borrowed Light 235</option>
-              </optgroup>
-              <optgroup label="Greens">
-                <option value="#4A5240">Calke Green 34</option>
-                <option value="#3A4A30">Viridian 214</option>
-                <option value="#4A5A3A">Chappell Green 83</option>
-                <option value="#5A6A4A">Mizzle Green</option>
-                <option value="#6A7A5A">Saxon Green 80</option>
-                <option value="#7A8A6A">Lichen 19</option>
-                <option value="#8A9A7A">Green Ground 206</option>
-                <option value="#9AAA8A">Mist Green</option>
-                <option value="#526B58">Card Room Green 79</option>
-                <option value="#3D5A42">Pea Green 33</option>
-              </optgroup>
-              <optgroup label="Reds &amp; Pinks">
-                <option value="#7A1F2E">Rectory Red 217</option>
-                <option value="#5C1A25">Incarnadine 248</option>
-                <option value="#8A2A3A">Blazer 212</option>
-                <option value="#C86070">Cinder Rose 246</option>
-                <option value="#D8707E">Pelt 254</option>
-                <option value="#E88A96">Pink Ground 202</option>
-              </optgroup>
-              <optgroup label="Yellows &amp; Oranges">
-                <option value="#D4A84B">India Yellow 66</option>
-                <option value="#C49840">Sudbury Yellow 51</option>
-                <option value="#D4884A">Setting Plaster 231</option>
-                <option value="#C87840">Dutch Orange 235</option>
-                <option value="#A86030">Charlotte's Locks 268</option>
-              </optgroup>
-            </select>
-          </label>
-
-          <label className="control">
-            <div className="control__row">
-              <span>RAL number</span>
-            </div>
-            <RalInput onColor={setWoodColor} />
-          </label>
+          <Toggle label="Same colour both sides" checked={sameColor} onChange={(v) => {
+            setSameColor(v);
+            if (v) { setWoodColorExt(woodColorExt); setWoodColorInt(woodColorExt); }
+          }} />
+          {sameColor ? (
+            <ColorPicker label="Colour" value={woodColorExt} onChange={(hex) => { setWoodColorExt(hex); setWoodColorInt(hex); setWoodColor(hex); }} inputId="cp-both" />
+          ) : (
+            <>
+              <ColorPicker label="External colour" value={woodColorExt} onChange={setColorExt} inputId="cp-ext" />
+              <hr style={{ border: 'none', borderTop: '1px solid var(--color-border-tertiary)', margin: '8px 0' }} />
+              <ColorPicker label="Internal colour" value={woodColorInt} onChange={setColorInt} inputId="cp-int" />
+            </>
+          )}
         </div>
 
         <div className="card note">
