@@ -498,7 +498,9 @@ function BottomRailLowerProfile({ width, height, depth, material }) {
   );
 }
 
-function LowerBottomRail({ width, height, depth, yCenter, coreMaterial, extBeadMaterial, intBeadMaterial, flip = false }) {
+function LowerBottomRail({ width, height, depth, yCenter, stileWidth, coreMaterial, extBeadMaterial, intBeadMaterial, flip = false }) {
+  const extBeadWidth = width - stileWidth * 2 + 15 * 2;
+  const intBeadWidth = width - stileWidth * 2 + 18 * 2;
   return (
     <group position={[0, yCenter, 0]}>
       <SashRailCore
@@ -517,7 +519,7 @@ function LowerBottomRail({ width, height, depth, yCenter, coreMaterial, extBeadM
         material={coreMaterial}
       />
       <ExternalRailBead
-        width={width}
+        width={extBeadWidth}
         height={height}
         depth={depth}
         openingSide="top"
@@ -526,7 +528,7 @@ function LowerBottomRail({ width, height, depth, yCenter, coreMaterial, extBeadM
         material={extBeadMaterial}
       />
       <InternalOvoloRailBead
-        width={width}
+        width={intBeadWidth}
         height={height}
         depth={depth}
         openingSide="top"
@@ -621,7 +623,7 @@ function Sash({
       />
       <ExternalStileBead
         width={stileWidth}
-        height={height - topRail - bottomRail}
+        height={height - topRail - bottomRail + 15 * 2}
         depth={depth}
         openingSide="right"
         flip={flipChamfer}
@@ -630,7 +632,7 @@ function Sash({
       />
       <InternalOvoloStileBead
         width={stileWidth}
-        height={height - topRail - bottomRail}
+        height={height - topRail - bottomRail + 18 * 2}
         depth={depth}
         openingSide="right"
         flip={flipChamfer}
@@ -649,7 +651,7 @@ function Sash({
       />
       <ExternalStileBead
         width={stileWidth}
-        height={height - topRail - bottomRail}
+        height={height - topRail - bottomRail + 15 * 2}
         depth={depth}
         openingSide="left"
         flip={flipChamfer}
@@ -658,7 +660,7 @@ function Sash({
       />
       <InternalOvoloStileBead
         width={stileWidth}
-        height={height - topRail - bottomRail}
+        height={height - topRail - bottomRail + 18 * 2}
         depth={depth}
         openingSide="left"
         flip={flipChamfer}
@@ -676,7 +678,7 @@ function Sash({
         material={coreMaterial}
       />
       <ExternalRailBead
-        width={width - stileWidth * 2}
+        width={width - stileWidth * 2 + 15 * 2}
         height={topRail}
         depth={depth}
         openingSide="bottom"
@@ -685,7 +687,7 @@ function Sash({
         material={externalBeadMaterial}
       />
       <InternalOvoloRailBead
-        width={width - stileWidth * 2}
+        width={width - stileWidth * 2 + 18 * 2}
         height={topRail}
         depth={depth}
         openingSide="bottom"
@@ -700,6 +702,7 @@ function Sash({
           height={bottomRail}
           depth={depth}
           yCenter={bottomRailY}
+          stileWidth={stileWidth}
           coreMaterial={coreMaterial}
           extBeadMaterial={externalBeadMaterial}
           intBeadMaterial={internalBeadMaterial}
@@ -717,7 +720,7 @@ function Sash({
             material={coreMaterial}
           />
           <ExternalRailBead
-            width={width - stileWidth * 2}
+            width={width - stileWidth * 2 + 15 * 2}
             height={bottomRail}
             depth={depth}
             openingSide="top"
@@ -726,7 +729,7 @@ function Sash({
             material={externalBeadMaterial}
           />
           <InternalOvoloRailBead
-            width={width - stileWidth * 2}
+            width={width - stileWidth * 2 + 18 * 2}
             height={bottomRail}
             depth={depth}
             openingSide="top"
