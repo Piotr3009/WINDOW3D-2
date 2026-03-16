@@ -1843,7 +1843,7 @@ export default function ParametricSashWindow({
       {(() => {
         const twoFasteneres = width > 1200 || upperBars !== 'none';
         const xPositions = twoFasteneres
-          ? [-mm(sashWidth / 2 - 150), mm(sashWidth / 2 - 150)]
+          ? [-mm(sashWidth / 2 - 250), mm(sashWidth / 2 - 250)]
           : [0];
 
         // Body: na dolnym railu górnej sashki — interior face (od środka pokoju)
