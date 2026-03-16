@@ -1217,7 +1217,7 @@ function PulleySet({
   const cordPoints = buildPulleyCordPoints({
     center: [0, 0],
     radius: pulleyCordRadius,
-    leftDropY: -mm(120) - pulleyTravel,
+    leftDropY: -mm(556) - pulleyTravel,
     rightDropY: -mm(556) + pulleyTravel,
     z: 0,
   });
@@ -1569,6 +1569,8 @@ export default function ParametricSashWindow({
   woodColor = '#f0e6d3',
   woodColorExt = null,
   woodColorInt = null,
+  showHorns = true,
+  hornType = 'A',
 }) {
   const cExt = woodColorExt || woodColor;
   const cInt = woodColorInt || woodColor;
@@ -1868,6 +1870,21 @@ export default function ParametricSashWindow({
         ));
       })()}
 
+      {/* Sash Horns — dolne rogi górnej sashki, exterior face */}
+      {showHorns && (() => {
+        const upperSashBottom = (yTopClosed - mm(upperOpeningDrop)) - mm(upperSashHeight) / 2;
+        const hornY = upperSashBottom - mm(80);
+        const hornZLeft  = trackRearZ + mm(sashDepth / 2) - mm(57);
+        const hornZRight = trackRearZ + mm(sashDepth / 2);
+        const leftX  = -mm(sashWidth / 2);
+        const rightX =  mm(sashWidth / 2);
+        const hornMat = new THREE.MeshStandardMaterial({ color: cExt, roughness: 0.46, metalness: 0.02 });
+        return [
+          <group key="horn-left"  position={[leftX,  hornY, hornZLeft]}  rotation={[0, 0, 0]}       scale={0.001}><HornMesh material={hornMat} depth={sashDepth} type={hornType} /></group>,
+          <group key="horn-right" position={[rightX, hornY, hornZRight]} rotation={[0, Math.PI, 0]} scale={0.001}><HornMesh material={hornMat} depth={sashDepth} type={hornType} /></group>,
+        ];
+      })()}
+
       {/* Sash Stoppers — cylindry na stilach górnej sashki, 100mm powyżej meeting railu */}
       {(() => {
         const upperSashBottom = (yTopClosed - mm(upperOpeningDrop)) - mm(upperSashHeight) / 2;
@@ -2139,5 +2156,49 @@ function HandleMesh() {
         <meshStandardMaterial color="#8a6a20" metalness={0.9} roughness={0.2} />
       </mesh>
     </group>
+  );
+}
+
+function HornMesh({ material, depth = 57, type = 'A' }) {
+  const geometry = useMemo(() => {
+    const shape = new THREE.Shape();
+
+    if (type === 'A') {
+      shape.moveTo(0, 80);
+      shape.lineTo(40, 80);
+      shape.lineTo(40, 68);
+      shape.lineTo(33, 62);
+      shape.bezierCurveTo(44, 52, 43, 34, 28, 22);
+      shape.bezierCurveTo(16, 12, 15, 6, 27, 0);
+      shape.lineTo(22, -4);
+      shape.lineTo(0, -4);
+      shape.lineTo(0, 80);
+    } else if (type === 'D') {
+      shape.moveTo(0, 80);
+      shape.lineTo(40, 80);
+      shape.lineTo(40, 64);
+      shape.lineTo(34, 64);
+      shape.lineTo(34, 56);
+      shape.bezierCurveTo(34, 42, 30, 16, 18, 0);
+      shape.lineTo(0, 0);
+      shape.lineTo(0, 80);
+    }
+
+    shape.closePath();
+
+    const g = new THREE.ExtrudeGeometry(shape, {
+      depth: depth,
+      steps: 1,
+      bevelEnabled: false,
+      curveSegments: 48,
+    });
+    g.computeVertexNormals();
+    return g;
+  }, []);
+
+  return (
+    <mesh geometry={geometry} castShadow receiveShadow>
+      <primitive object={material} attach="material" />
+    </mesh>
   );
 }

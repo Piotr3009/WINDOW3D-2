@@ -342,6 +342,8 @@ export default function App() {
   const [upperOpening, setUpperOpening] = useState(0);
   const [autoRotate, setAutoRotate] = useState(false);
   const [showGuides, setShowGuides] = useState(true);
+  const [showHorns, setShowHorns] = useState(true);
+  const [hornType, setHornType] = useState('A');
   const [boxType, setBoxType] = useState('standard');
   const [woodColor, setWoodColor] = useState('#f0e6d3');
   const [woodColorExt, setWoodColorExt] = useState('#f0e6d3');
@@ -370,6 +372,8 @@ export default function App() {
       upperOpening,
       autoRotate,
       showGuides,
+      showHorns,
+      hornType,
       boxDepth: boxType === 'standard' ? 164 : 146,
       sashDepth: 57,
       boxType,
@@ -381,7 +385,7 @@ export default function App() {
       woodColorExt: sameColor ? woodColor : woodColorExt,
       woodColorInt: sameColor ? woodColor : woodColorInt,
     }),
-    [width, height, opening, upperOpening, autoRotate, showGuides, boxType, upperBars, lowerBars, upperCustomBars, lowerCustomBars, woodColor, woodColorExt, woodColorInt, sameColor],
+    [width, height, opening, upperOpening, autoRotate, showGuides, showHorns, hornType, boxType, upperBars, lowerBars, upperCustomBars, lowerCustomBars, woodColor, woodColorExt, woodColorInt, sameColor],
   );
 
   return (
@@ -547,6 +551,17 @@ export default function App() {
           </div>
           <Toggle label="Auto rotate" checked={autoRotate} onChange={setAutoRotate} />
           <Toggle label="Show guide dimensions" checked={showGuides} onChange={setShowGuides} />
+          <label className="select-wrap">
+            <span>Sash horns</span>
+            <select value={showHorns ? hornType : 'none'} onChange={(e) => {
+              if (e.target.value === 'none') { setShowHorns(false); }
+              else { setShowHorns(true); setHornType(e.target.value); }
+            }}>
+              <option value="none">No horns</option>
+              <option value="A">Type A</option>
+              <option value="D">Type D</option>
+            </select>
+          </label>
         </div>
 
         <div className="card">
