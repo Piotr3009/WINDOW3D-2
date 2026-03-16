@@ -558,7 +558,7 @@ export default function App() {
               else { setShowHorns(true); setHornType(e.target.value); }
             }}>
               <option value="none">No horns</option>
-              <option value="A">Type A</option>
+              <option value="A">Richmond</option>
               <option value="D">Type D</option>
             </select>
           </label>
