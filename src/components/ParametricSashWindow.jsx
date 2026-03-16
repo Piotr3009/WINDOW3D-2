@@ -1896,6 +1896,18 @@ export default function ParametricSashWindow({
         ));
       })()}
 
+      {/* Handle — od spodu meeting railu górnej sashki, exterior face */}
+      {(() => {
+        const upperSashBottom = (yTopClosed - mm(upperOpeningDrop)) - mm(upperSashHeight) / 2;
+        const handleY = upperSashBottom; // dolna powierzchnia meeting railu
+        const handleZ = trackRearZ + mm(sashDepth / 2) - mm(28); // exterior face górnej sashki -28mm
+        return (
+          <group position={[0, handleY, handleZ]} rotation={[Math.PI / 2, 0, 0]}>
+            <HandleMesh />
+          </group>
+        );
+      })()}
+
     </group>
   );
 }
@@ -2071,6 +2083,60 @@ function FingerLift() {
       </mesh>
       <mesh position={[1.25, 0.42, 0.11]} castShadow receiveShadow geometry={collarGeometry}>
         <meshStandardMaterial color="#c39a2e" metalness={0.9} roughness={0.25} />
+      </mesh>
+    </group>
+  );
+}
+function HandleMesh() {
+  const material = useMemo(() => new THREE.MeshStandardMaterial({
+    color: '#b08d57', metalness: 0.85, roughness: 0.35,
+  }), []);
+
+  const tubeCurve = useMemo(() => {
+    const arch = 20;
+    const hw = 76;
+    const pts = [];
+    for (let i = 0; i <= 32; i++) {
+      const x = -hw + (2 * hw * i / 32);
+      const t = x / hw;
+      const z = (1 - t * t) * arch;
+      pts.push(new THREE.Vector3(x, 0, z));
+    }
+    return new THREE.CatmullRomCurve3(pts);
+  }, []);
+
+  const tubeGeom = useMemo(() =>
+    new THREE.TubeGeometry(tubeCurve, 64, 3.5, 16, false),
+  [tubeCurve]);
+
+  const plateGeom = useMemo(() => {
+    const g = new THREE.CylinderGeometry(7, 7, 4, 32);
+    g.rotateX(Math.PI / 2);
+    return g;
+  }, []);
+
+  const screwGeom = useMemo(() => {
+    const g = new THREE.CylinderGeometry(2.2, 2.2, 5, 16);
+    g.rotateX(Math.PI / 2);
+    return g;
+  }, []);
+
+  return (
+    <group scale={0.001}>
+      <mesh geometry={tubeGeom} castShadow receiveShadow>
+        <primitive object={material} attach="material" />
+      </mesh>
+      <mesh geometry={plateGeom} position={[-67, 0, 0]} castShadow receiveShadow>
+        <primitive object={material} attach="material" />
+      </mesh>
+      <mesh geometry={plateGeom} position={[67, 0, 0]} castShadow receiveShadow>
+        <primitive object={material} attach="material" />
+      </mesh>
+      <mesh geometry={screwGeom} position={[-67, 0, -3]} castShadow receiveShadow>
+        <meshStandardMaterial color="#8a6a20" metalness={0.9} roughness={0.2} />
+      </mesh>
+      <mesh geometry={screwGeom} position={[67, 0, -3]} castShadow receiveShadow>
+        <meshStandardMaterial color="#8a6a20" metalness={0.9} roughness={0.2} />
       </mesh>
     </group>
   );
