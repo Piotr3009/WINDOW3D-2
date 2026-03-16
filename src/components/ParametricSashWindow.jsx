@@ -1868,7 +1868,21 @@ export default function ParametricSashWindow({
         ));
       })()}
 
-      {/* Finger Lifts — na interior face dolnego railu dolnej sashki, 200mm od krawędzi */}
+      {/* Sash Stoppers — cylindry na stilach górnej sashki, 100mm powyżej meeting railu */}
+      {(() => {
+        const upperSashBottom = (yTopClosed - mm(upperOpeningDrop)) - mm(upperSashHeight) / 2;
+        const stopperY = upperSashBottom + mm(43) + mm(100);
+        const stopperZ = trackRearZ - mm(sashDepth / 2);
+        const leftX  = -mm(sashWidth / 2) + mm(config.stileWidth / 2);
+        const rightX =  mm(sashWidth / 2) - mm(config.stileWidth / 2);
+        const stopperMaterial = new THREE.MeshStandardMaterial({ color: '#d4af37', metalness: 0.92, roughness: 0.18 });
+        return [leftX, rightX].map((x, i) => (
+          <mesh key={i} position={[x, stopperY, stopperZ]} rotation={[Math.PI / 2, 0, 0]} castShadow receiveShadow>
+            <cylinderGeometry args={[mm(8), mm(8), mm(40), 32]} />
+            <primitive object={stopperMaterial} attach="material" />
+          </mesh>
+        ));
+      })()}
       {(() => {
         const lowerSashBottom = (yBottomClosed + mm(lowerOpeningLift)) - mm(lowerSashHeight) / 2;
         const liftY = lowerSashBottom + mm(45); // centrum bottom rail (90mm/2)
