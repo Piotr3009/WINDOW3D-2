@@ -1880,8 +1880,8 @@ export default function ParametricSashWindow({
         const rightX =  mm(sashWidth / 2);
         const hornMat = new THREE.MeshStandardMaterial({ color: cExt, roughness: 0.46, metalness: 0.02 });
         return [
-          <group key="horn-left"  position={[leftX,  hornY, hornZLeft]}  rotation={[0, 0, 0]}       scale={0.001}><HornMesh material={hornMat} depth={sashDepth} type={hornType} /></group>,
-          <group key="horn-right" position={[rightX, hornY, hornZRight]} rotation={[0, Math.PI, 0]} scale={0.001}><HornMesh material={hornMat} depth={sashDepth} type={hornType} /></group>,
+          <group key={`horn-left-${hornType}`}  position={[leftX,  hornY, hornZLeft]}  rotation={[0, 0, 0]}       scale={0.001}><HornMesh material={hornMat} depth={sashDepth} type={hornType} /></group>,
+          <group key={`horn-right-${hornType}`} position={[rightX, hornY, hornZRight]} rotation={[0, Math.PI, 0]} scale={0.001}><HornMesh material={hornMat} depth={sashDepth} type={hornType} /></group>,
         ];
       })()}
 
@@ -2194,7 +2194,7 @@ function HornMesh({ material, depth = 57, type = 'A' }) {
     });
     g.computeVertexNormals();
     return g;
-  }, []);
+  }, [type, depth]);
 
   return (
     <mesh geometry={geometry} castShadow receiveShadow>
