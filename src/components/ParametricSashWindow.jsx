@@ -1848,20 +1848,20 @@ export default function ParametricSashWindow({
 
         // Body: na dolnym railu górnej sashki — interior face (od środka pokoju)
         const upperSashBottom = (yTopClosed - mm(upperOpeningDrop)) - mm(upperSashHeight) / 2;
-        const bodyZ = trackRearZ - mm(sashDepth / 2) + mm(40); // interior face górnej sashki +40mm
+        const bodyZ = trackRearZ - mm(sashDepth / 2); // interior face górnej sashki
 
         // Keep: na górnym railu dolnej sashki — interior face
         const lowerSashTop = (yBottomClosed + mm(lowerOpeningLift)) + mm(lowerSashHeight) / 2;
         const keepY = lowerSashTop; // na górnej powierzchni meeting railu dolnej sashki
         const bodyY = upperSashBottom + mm(43); // górna powierzchnia meeting railu górnej sashki
-        const keepZ = trackFrontZ - mm(sashDepth / 2) + mm(10); // interior face dolnej sashki +10mm
+        const keepZ = trackFrontZ - mm(sashDepth / 2) + mm(85); // interior face dolnej sashki +85mm
 
         return xPositions.map((x, i) => (
           <group key={i}>
-            <group position={[x, bodyY, keepZ]} rotation={[Math.PI / 2, Math.PI, Math.PI]} scale={0.001}>
+            <group position={[x, bodyY, bodyZ]} rotation={[Math.PI / 2, Math.PI, Math.PI]} scale={0.001}>
               <FitchFastenerBody />
             </group>
-            <group position={[x, keepY, bodyZ]} rotation={[Math.PI / 2, Math.PI, Math.PI]} scale={0.001}>
+            <group position={[x, keepY, keepZ]} rotation={[Math.PI / 2, Math.PI, Math.PI]} scale={0.001}>
               <FitchFastenerKeep />
             </group>
           </group>
