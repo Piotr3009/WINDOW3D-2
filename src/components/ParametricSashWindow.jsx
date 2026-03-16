@@ -145,26 +145,78 @@ function GlassReflections({ width, height, z = 0.008 }) {
   );
 }
 
-function GlassPane({ size, position }) {
+function createFrostedTexture() {
+  const size = 256;
+  const canvas = document.createElement('canvas');
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#d0e4f0';
+  ctx.fillRect(0, 0, size, size);
+  for (let i = 0; i < 40000; i++) {
+    const x = Math.random() * size;
+    const y = Math.random() * size;
+    const r = Math.random() * 2;
+    const alpha = Math.random() * 0.35;
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(255,255,255,${alpha})`;
+    ctx.fill();
+  }
+  for (let i = 0; i < 8000; i++) {
+    const x = Math.random() * size;
+    const y = Math.random() * size;
+    const r = Math.random() * 1.2;
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(140,180,210,${Math.random() * 0.25})`;
+    ctx.fill();
+  }
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
+  texture.repeat.set(4, 4);
+  return texture;
+}
+
+function GlassPane({ size, position, frosted = false }) {
   const [w, h, d] = size;
+  const frostedTexture = useMemo(() => frosted ? createFrostedTexture() : null, [frosted]);
 
   return (
     <group position={position}>
       <mesh castShadow={false} receiveShadow>
         <boxGeometry args={[w, h, d]} />
-        <meshPhysicalMaterial
-          color="#cfe3f5"
-          roughness={0.015}
-          metalness={0}
-          transmission={0.985}
-          transparent
-          opacity={0.52}
-          thickness={0.028}
-          ior={1.52}
-          clearcoat={1}
-          clearcoatRoughness={0.01}
-          reflectivity={0.9}
-        />
+        {frosted ? (
+          <meshPhysicalMaterial
+            color="#c8dce8"
+            roughness={1.0}
+            metalness={0}
+            transmission={0.15}
+            transparent
+            opacity={0.96}
+            thickness={0.028}
+            ior={1.52}
+            clearcoat={0.0}
+            clearcoatRoughness={1.0}
+            map={frostedTexture}
+            roughnessMap={frostedTexture}
+          />
+        ) : (
+          <meshPhysicalMaterial
+            color="#cfe3f5"
+            roughness={0.015}
+            metalness={0}
+            transmission={0.985}
+            transparent
+            opacity={0.52}
+            thickness={0.028}
+            ior={1.52}
+            clearcoat={1}
+            clearcoatRoughness={0.01}
+            reflectivity={0.9}
+          />
+        )}
       </mesh>
 
       <GlassReflections width={w} height={h} z={d / 2 + 0.001} />
@@ -674,11 +726,25 @@ function GlazingBars({ clearWidth, clearHeight, glassDepth, barPattern = 'none',
 
   const bars = useMemo(() => {
     if (barPattern === 'custom') {
-      return customBars.map(b => ({
-        type: b.type,
-        x: b.type === 'v' ? -clearWidth / 2 + mm(b.mm) : 0,
-        y: b.type === 'h' ? -clearHeight / 2 + mm(b.mm) : 0,
-      }));
+      const vBars = customBars.filter(b => b.type === 'v');
+      const hBars = customBars.filter(b => b.type === 'h');
+      const result = [];
+      customBars.forEach(b => {
+        if (b.type === 'v') {
+          const idx = vBars.indexOf(b);
+          const x = idx === 0
+            ? -clearWidth / 2 + mm(b.mm)   // 1. od lewej
+            : clearWidth / 2 - mm(b.mm);    // 2. od prawej
+          result.push({ type: 'v', x, y: 0 });
+        } else {
+          const idx = hBars.indexOf(b);
+          const y = idx === 0
+            ? -clearHeight / 2 + mm(b.mm)  // 1. od dołu
+            : clearHeight / 2 - mm(b.mm);  // 2. od góry
+          result.push({ type: 'h', x: 0, y });
+        }
+      });
+      return result;
     }
     if (!pattern) return [];
     const items = [];
@@ -735,6 +801,7 @@ function Sash({
   customBars = [],
   colorExt = null,
   colorInt = null,
+  frosted = false,
 }) {
   const colorE = colorExt || color;
   const colorI = colorInt || color;
@@ -815,7 +882,7 @@ function Sash({
         </>
       )}
 
-      <GlassPane size={[clearWidth, clearHeight, glassD]} position={[0, glassY, glassCenterZ]} />
+      <GlassPane size={[clearWidth, clearHeight, glassD]} position={[0, glassY, glassCenterZ]} frosted={frosted} />
       <group position={[0, glassY, glassCenterZ]}>
         <GlazingBars clearWidth={clearWidth} clearHeight={clearHeight} glassDepth={glassD} barPattern={barPattern} customBars={customBars} material={extCoreMaterial} materialInt={intCoreMaterial} />
       </group>
@@ -1571,6 +1638,8 @@ export default function ParametricSashWindow({
   woodColorInt = null,
   showHorns = true,
   hornType = 'A',
+  upperGlass = 'clear',
+  lowerGlass = 'clear',
 }) {
   const cExt = woodColorExt || woodColor;
   const cInt = woodColorInt || woodColor;
@@ -1797,6 +1866,7 @@ export default function ParametricSashWindow({
         customBars={upperCustomBars}
         colorExt={cExt}
         colorInt={cInt}
+        frosted={upperGlass === 'frosted'}
       />
 
       <Sash
@@ -1816,6 +1886,7 @@ export default function ParametricSashWindow({
         customBars={lowerCustomBars}
         colorExt={cExt}
         colorInt={cInt}
+        frosted={lowerGlass === 'frosted'}
       />
 
       {showGuides && (

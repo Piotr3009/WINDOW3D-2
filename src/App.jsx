@@ -213,48 +213,86 @@ function ColorPicker({ label, value, onChange, inputId }) {
         <select value="" onChange={(e) => e.target.value && onChange(e.target.value)}>
           <option value="">— F&amp;B —</option>
           <optgroup label="Whites">
-            <option value="#F6F4EE">All White 2005</option><option value="#F4F0E4">James White 2010</option>
-            <option value="#EEEADE">Pointing 2003</option><option value="#EDE8D8">Cream 2012</option>
-            <option value="#EAE4D4">White Tie 2002</option><option value="#E8E2CC">String 8</option>
-            <option value="#F2EEE4">Wimborne White 239</option><option value="#EDE6D4">Slipper Satin 2004</option>
-            <option value="#EAE0C8">Skimming Stone 241</option><option value="#F0EAD8">New White 59</option>
+            <option value="#fdfbfc">All White 2005</option>
+            <option value="#f2f0e8">Strong White 2001</option>
+            <option value="#ede8dc">Great White 2006</option>
+            <option value="#f0ece0">Wimborne White 239</option>
+            <option value="#fdfeec">Pointing 2003</option>
+            <option value="#f3f0e1">James White 2010</option>
+            <option value="#ede6d5">White Tie 2002</option>
+            <option value="#ede3ce">Slipper Satin 2004</option>
+            <option value="#e8e2d0">Skimming Stone 241</option>
+            <option value="#eee8d8">New White 59</option>
+            <option value="#e8e0cc">String 8</option>
+            <option value="#eae0d0">Dimity 2008</option>
           </optgroup>
           <optgroup label="Neutrals &amp; Stones">
-            <option value="#D5C9B0">Elephant's Breath 229</option><option value="#C8BC9E">Mole's Breath 276</option>
-            <option value="#C2B49A">Bone 15</option><option value="#BEB49A">Hardwick White 5</option>
-            <option value="#B4A890">Purbeck Stone 275</option><option value="#AFA08A">Joa's White 226</option>
-            <option value="#A89880">Savage Ground 213</option><option value="#9E8E70">Dead Salmon 28</option>
-            <option value="#8E7E68">Buff 20</option><option value="#7A6A54">Oxford Stone 264</option>
-            <option value="#6C5C46">Sand II 40</option><option value="#645448">Sand III 21</option>
-            <option value="#5C4C3A">Mouse's Back 40</option>
+            <option value="#ccbfb3">Elephant's Breath 229</option>
+            <option value="#d0ccc4">Ammonite 274</option>
+            <option value="#c8c4b8">Cornforth White 228</option>
+            <option value="#c0b8a8">Purbeck Stone 275</option>
+            <option value="#9d9088">Mole's Breath 276</option>
+            <option value="#b8b0a0">Joa's White 226</option>
+            <option value="#b0a898">Drop Cloth 283</option>
+            <option value="#c4977a">Dead Salmon 28</option>
+            <option value="#b8a890">Oxford Stone 264</option>
+            <option value="#a89880">Savage Ground 213</option>
+            <option value="#8c7c68">Mouse's Back 40</option>
+            <option value="#c8b898">Stony Ground 211</option>
+            <option value="#d8c8b0">Matchstick 2013</option>
           </optgroup>
           <optgroup label="Greys">
-            <option value="#B8B8B0">Mizzle 266</option><option value="#A8A8A0">Pigeon 25</option>
-            <option value="#989890">Lamp Room Gray 88</option><option value="#888880">Pavilion Gray 242</option>
-            <option value="#787870">Worsted 284</option><option value="#686860">Plummett 272</option>
-            <option value="#383830">Down Pipe 26</option><option value="#2C3531">Railings 31</option>
-            <option value="#3B3D38">Off-Black 57</option><option value="#2E3028">Pitch Black 256</option>
+            <option value="#b9beaa">Pigeon 25</option>
+            <option value="#c8c8c0">Ammonite 274</option>
+            <option value="#a8a8a0">Pavilion Gray 242</option>
+            <option value="#9c9c98">Lamp Room Gray 88</option>
+            <option value="#b0b0a8">Mizzle 266</option>
+            <option value="#8c8880">Worsted 284</option>
+            <option value="#949088">Manor House Gray 265</option>
+            <option value="#787470">Plummett 272</option>
+            <option value="#3c3d42">Down Pipe 26</option>
+            <option value="#45484b">Railings 31</option>
+            <option value="#313639">Off-Black 57</option>
+            <option value="#292820">Pitch Black 256</option>
           </optgroup>
           <optgroup label="Blues">
-            <option value="#1B3A5C">Hague Blue 30</option><option value="#233B5A">Stiffkey Blue 281</option>
-            <option value="#2A4870">Inchyra Blue 289</option><option value="#3A5878">Prussian Blue 232</option>
-            <option value="#4A6888">Lulworth Blue 89</option><option value="#5A7898">Parma Gray 27</option>
-            <option value="#7898B8">Pale Powder 204</option><option value="#8898A8">Borrowed Light 235</option>
+            <option value="#2c3437">Hague Blue 30</option>
+            <option value="#2c3a48">Stiffkey Blue 281</option>
+            <option value="#586768">Inchyra Blue 289</option>
+            <option value="#759194">Stone Blue 86</option>
+            <option value="#6888a0">Lulworth Blue 89</option>
+            <option value="#8898a8">Parma Gray 27</option>
+            <option value="#aac0b3">Dix Blue 82</option>
+            <option value="#c8d4d8">Borrowed Light 235</option>
+            <option value="#cfd7cc">Light Blue 22</option>
           </optgroup>
           <optgroup label="Greens">
-            <option value="#4A5240">Calke Green 34</option><option value="#3A4A30">Viridian 214</option>
-            <option value="#4A5A3A">Chappell Green 83</option><option value="#6A7A5A">Saxon Green 80</option>
-            <option value="#7A8A6A">Lichen 19</option><option value="#526B58">Card Room Green 79</option>
-            <option value="#3D5A42">Pea Green 33</option>
+            <option value="#5a6850">Calke Green 34</option>
+            <option value="#485840">Viridian 214</option>
+            <option value="#636f65">Green Smoke 47</option>
+            <option value="#73806e">Card Room Green 79</option>
+            <option value="#7a8868">Saxon Green 80</option>
+            <option value="#5a7048">Pea Green 33</option>
+            <option value="#a0a88c">Lichen 19</option>
+            <option value="#708068">Chappell Green 83</option>
           </optgroup>
           <optgroup label="Reds &amp; Pinks">
-            <option value="#7A1F2E">Rectory Red 217</option><option value="#5C1A25">Incarnadine 248</option>
-            <option value="#8A2A3A">Blazer 212</option><option value="#C86070">Cinder Rose 246</option>
-            <option value="#E88A96">Pink Ground 202</option>
+            <option value="#8c182b">Rectory Red 217</option>
+            <option value="#6a1820">Incarnadine 248</option>
+            <option value="#8a2030">Blazer 212</option>
+            <option value="#d08880">Cinder Rose 246</option>
+            <option value="#d4a0a0">Calamine 230</option>
+            <option value="#e8a898">Pink Ground 202</option>
+            <option value="#c09090">Sulking Room Pink 295</option>
+            <option value="#d8b0a8">Peignoir 286</option>
           </optgroup>
           <optgroup label="Yellows &amp; Oranges">
-            <option value="#D4A84B">India Yellow 66</option><option value="#C49840">Sudbury Yellow 51</option>
-            <option value="#D4884A">Setting Plaster 231</option><option value="#A86030">Charlotte's Locks 268</option>
+            <option value="#ce923c">India Yellow 66</option>
+            <option value="#dac586">Hay 37</option>
+            <option value="#c89830">Sudbury Yellow 51</option>
+            <option value="#d09878">Setting Plaster 231</option>
+            <option value="#c07030">Charlotte's Locks 268</option>
+            <option value="#d4a860">Babouche 223</option>
           </optgroup>
         </select>
       </label>
@@ -344,6 +382,8 @@ export default function App() {
   const [showGuides, setShowGuides] = useState(true);
   const [showHorns, setShowHorns] = useState(true);
   const [hornType, setHornType] = useState('A');
+  const [upperGlass, setUpperGlass] = useState('clear');
+  const [lowerGlass, setLowerGlass] = useState('clear');
   const [boxType, setBoxType] = useState('standard');
   const [woodColor, setWoodColor] = useState('#f0e6d3');
   const [woodColorExt, setWoodColorExt] = useState('#f0e6d3');
@@ -374,6 +414,8 @@ export default function App() {
       showGuides,
       showHorns,
       hornType,
+      upperGlass,
+      lowerGlass,
       boxDepth: boxType === 'standard' ? 164 : 146,
       sashDepth: 57,
       boxType,
@@ -385,7 +427,7 @@ export default function App() {
       woodColorExt: sameColor ? woodColor : woodColorExt,
       woodColorInt: sameColor ? woodColor : woodColorInt,
     }),
-    [width, height, opening, upperOpening, autoRotate, showGuides, showHorns, hornType, boxType, upperBars, lowerBars, upperCustomBars, lowerCustomBars, woodColor, woodColorExt, woodColorInt, sameColor],
+    [width, height, opening, upperOpening, autoRotate, showGuides, showHorns, hornType, upperGlass, lowerGlass, boxType, upperBars, lowerBars, upperCustomBars, lowerCustomBars, woodColor, woodColorExt, woodColorInt, sameColor],
   );
 
   return (
@@ -451,37 +493,40 @@ export default function App() {
           {upperBars === 'custom' && (
             <div className="custom-bars">
               <div className="custom-bars__actions">
-                <button onClick={() => setUpperCustomBars(b => [...b, { type: 'v', mm: Math.round(width / 2) }])}>+ Vertical</button>
-                <button onClick={() => setUpperCustomBars(b => [...b, { type: 'h', mm: Math.round(height / 4) }])}>+ Horizontal</button>
+                <button
+                  onClick={() => setUpperCustomBars(b => [...b, { type: 'v', mm: 100 }])}
+                  disabled={upperCustomBars.filter(b => b.type === 'v').length >= 2}
+                >+ Vertical</button>
+                <button
+                  onClick={() => setUpperCustomBars(b => [...b, { type: 'h', mm: 100 }])}
+                  disabled={upperCustomBars.filter(b => b.type === 'h').length >= 2}
+                >+ Horizontal</button>
               </div>
-              {upperCustomBars.map((bar, i) => (
-                <label key={i} className="control">
-                  <div className="control__row">
-                    <span>{bar.type === 'v' ? 'Vertical' : 'Horizontal'} {i + 1}</span>
-                    <button onClick={() => setUpperCustomBars(b => b.filter((_, j) => j !== i))}>✕</button>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <input
-                      type="range"
-                      min="10"
-                      max={bar.type === 'v' ? width - 10 : height / 2 - 10}
-                      step="1"
-                      value={bar.mm}
-                      onChange={(e) => setUpperCustomBars(b => b.map((x, j) => j === i ? { ...x, mm: Number(e.target.value) } : x))}
-                      style={{ flex: 1 }}
-                    />
-                    <input
-                      type="number"
-                      min="10"
-                      max={bar.type === 'v' ? width - 10 : height / 2 - 10}
-                      value={bar.mm}
-                      onChange={(e) => setUpperCustomBars(b => b.map((x, j) => j === i ? { ...x, mm: Number(e.target.value) } : x))}
-                      style={{ width: '60px' }}
-                    />
-                    <span>mm</span>
-                  </div>
-                </label>
-              ))}
+              {upperCustomBars.map((bar, i) => {
+                const sameType = upperCustomBars.slice(0, i).filter(b => b.type === bar.type);
+                const idx = sameType.length;
+                const fromLabel = bar.type === 'v'
+                  ? (idx === 0 ? 'from left' : 'from right')
+                  : (idx === 0 ? 'from bottom' : 'from top');
+                const maxVal = bar.type === 'v' ? width - 10 : height / 2 - 10;
+                return (
+                  <label key={i} className="control">
+                    <div className="control__row">
+                      <span>{bar.type === 'v' ? 'Vertical' : 'Horizontal'} — {fromLabel}</span>
+                      <button onClick={() => setUpperCustomBars(b => b.filter((_, j) => j !== i))}>✕</button>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <input type="range" min="10" max={maxVal} step="1" value={bar.mm}
+                        onChange={(e) => setUpperCustomBars(b => b.map((x, j) => j === i ? { ...x, mm: Number(e.target.value) } : x))}
+                        style={{ flex: 1 }} />
+                      <input type="number" min="10" max={maxVal} value={bar.mm}
+                        onChange={(e) => setUpperCustomBars(b => b.map((x, j) => j === i ? { ...x, mm: Number(e.target.value) } : x))}
+                        style={{ width: '60px' }} />
+                      <span>mm</span>
+                    </div>
+                  </label>
+                );
+              })}
             </div>
           )}
           {!sameBars && (
@@ -501,39 +546,60 @@ export default function App() {
           {!sameBars && lowerBars === 'custom' && (
             <div className="custom-bars">
               <div className="custom-bars__actions">
-                <button onClick={() => setLowerCustomBars(b => [...b, { type: 'v', mm: Math.round(width / 2) }])}>+ Vertical</button>
-                <button onClick={() => setLowerCustomBars(b => [...b, { type: 'h', mm: Math.round(height / 4) }])}>+ Horizontal</button>
+                <button
+                  onClick={() => setLowerCustomBars(b => [...b, { type: 'v', mm: 100 }])}
+                  disabled={lowerCustomBars.filter(b => b.type === 'v').length >= 2}
+                >+ Vertical</button>
+                <button
+                  onClick={() => setLowerCustomBars(b => [...b, { type: 'h', mm: 100 }])}
+                  disabled={lowerCustomBars.filter(b => b.type === 'h').length >= 2}
+                >+ Horizontal</button>
               </div>
-              {lowerCustomBars.map((bar, i) => (
-                <label key={i} className="control">
-                  <div className="control__row">
-                    <span>{bar.type === 'v' ? 'Vertical' : 'Horizontal'} {i + 1}</span>
-                    <button onClick={() => setLowerCustomBars(b => b.filter((_, j) => j !== i))}>✕</button>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <input
-                      type="range"
-                      min="10"
-                      max={bar.type === 'v' ? width - 10 : height / 2 - 10}
-                      step="1"
-                      value={bar.mm}
-                      onChange={(e) => setLowerCustomBars(b => b.map((x, j) => j === i ? { ...x, mm: Number(e.target.value) } : x))}
-                      style={{ flex: 1 }}
-                    />
-                    <input
-                      type="number"
-                      min="10"
-                      max={bar.type === 'v' ? width - 10 : height / 2 - 10}
-                      value={bar.mm}
-                      onChange={(e) => setLowerCustomBars(b => b.map((x, j) => j === i ? { ...x, mm: Number(e.target.value) } : x))}
-                      style={{ width: '60px' }}
-                    />
-                    <span>mm</span>
-                  </div>
-                </label>
-              ))}
+              {lowerCustomBars.map((bar, i) => {
+                const sameType = lowerCustomBars.slice(0, i).filter(b => b.type === bar.type);
+                const idx = sameType.length;
+                const fromLabel = bar.type === 'v'
+                  ? (idx === 0 ? 'from left' : 'from right')
+                  : (idx === 0 ? 'from bottom' : 'from top');
+                const maxVal = bar.type === 'v' ? width - 10 : height / 2 - 10;
+                return (
+                  <label key={i} className="control">
+                    <div className="control__row">
+                      <span>{bar.type === 'v' ? 'Vertical' : 'Horizontal'} — {fromLabel}</span>
+                      <button onClick={() => setLowerCustomBars(b => b.filter((_, j) => j !== i))}>✕</button>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <input type="range" min="10" max={maxVal} step="1" value={bar.mm}
+                        onChange={(e) => setLowerCustomBars(b => b.map((x, j) => j === i ? { ...x, mm: Number(e.target.value) } : x))}
+                        style={{ flex: 1 }} />
+                      <input type="number" min="10" max={maxVal} value={bar.mm}
+                        onChange={(e) => setLowerCustomBars(b => b.map((x, j) => j === i ? { ...x, mm: Number(e.target.value) } : x))}
+                        style={{ width: '60px' }} />
+                      <span>mm</span>
+                    </div>
+                  </label>
+                );
+              })}
             </div>
           )}
+        </div>
+
+        <div className="card">
+          <h2>Glass</h2>
+          <label className="select-wrap">
+            <span>Upper sash</span>
+            <select value={upperGlass} onChange={(e) => setUpperGlass(e.target.value)}>
+              <option value="clear">Clear</option>
+              <option value="frosted">Frosted</option>
+            </select>
+          </label>
+          <label className="select-wrap">
+            <span>Lower sash</span>
+            <select value={lowerGlass} onChange={(e) => setLowerGlass(e.target.value)}>
+              <option value="clear">Clear</option>
+              <option value="frosted">Frosted</option>
+            </select>
+          </label>
         </div>
 
         <div className="card">
