@@ -189,7 +189,7 @@ select {
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse at center, transparent 25%, rgba(40, 40, 40, 0.4) 100%);
+  background: radial-gradient(ellipse at center, transparent 30%, rgba(60, 50, 40, 0.35) 100%);
   pointer-events: none;
   z-index: 1;
 }

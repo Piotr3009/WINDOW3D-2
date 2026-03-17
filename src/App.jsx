@@ -316,18 +316,18 @@ function Scene({ config }) {
 
   return (
     <>
-      <color attach="background" args={['#cccccc']} />
-      <fog attach="fog" args={['#cccccc', 7, 14]} />
+      <color attach="background" args={['#ebe6de']} />
+      <fog attach="fog" args={['#ebe6de', 7, 14]} />
 
       <PerspectiveCamera makeDefault position={[2.75, 1.65, 3.8]} fov={32} />
 
-      {/* Ambient — delikatne, nie przepali kolorów */}
+      {/* Ambient */}
       <ambientLight intensity={0.4 * b} />
 
-      {/* Hemisphere — niebo ciepłe, podłoga chłodna */}
+      {/* Hemisphere */}
       <hemisphereLight args={['#fdf6e8', '#c8c0b0', 0.6 * b]} />
 
-      {/* Główne słońce — góra-prawy-przód, rzuca cienie */}
+      {/* Główne słońce */}
       <directionalLight
         position={[4, 6, 5]}
         intensity={1.4 * b}
@@ -337,22 +337,34 @@ function Scene({ config }) {
         shadow-bias={-0.0001}
       />
 
-      {/* Fill lewy — miękkie wypełnienie cieni */}
-      <directionalLight position={[-3, 2, 3]} intensity={0.5 * b} />
+      {/* Fill boki — symetrycznie przód i tył */}
+      <directionalLight position={[-3, 2,  3]} intensity={0.6 * b} />
+      <directionalLight position={[-3, 2, -3]} intensity={0.6 * b} />
+      <directionalLight position={[ 3, 2,  3]} intensity={0.4 * b} />
+      <directionalLight position={[ 3, 2, -3]} intensity={0.4 * b} />
 
-      {/* Fill tylny — oświetla tył okna i ironmongery */}
-      <directionalLight position={[0, 3, -4]} intensity={0.7 * b} />
+      {/* Fill z dołu pod 45° — obydwie strony */}
+      <directionalLight position={[-2, -2,  2]} intensity={0.25 * b} color="#e8d8c0" />
+      <directionalLight position={[ 2, -2, -2]} intensity={0.25 * b} color="#e8d8c0" />
 
-      {/* Światło z dołu — symuluje odbicie od podłogi */}
-      <directionalLight position={[0, -2, 2]} intensity={0.2 * b} color="#e8d8c0" />
+      {/* Point lights — przód */}
+      <pointLight position={[ 0.5, 0.5,  1.2]} intensity={1.22 * b} distance={6} decay={2} color="#fff8f0" />
+      <pointLight position={[-0.5, 0,    1.2]} intensity={1.22 * b} distance={6} decay={2} color="#fff4e8" />
 
-      {/* Point lights — mocny połysk na mosiądzu i metalach */}
-      <pointLight position={[0.5, 0.5, 1.2]} intensity={1.0 * b} distance={6} decay={2} color="#fff8f0" />
-      <pointLight position={[-0.5, 0, 1.2]} intensity={0.7 * b} distance={6} decay={2} color="#fff4e8" />
-      <pointLight position={[0.5, 0, -1.5]} intensity={1.0 * b} distance={6} decay={2} color="#f0f4ff" />
-      <pointLight position={[-0.5, 0, -1.5]} intensity={1.0 * b} distance={6} decay={2} color="#f0f4ff" />
-      <pointLight position={[1.5, 0.5, -1.5]} intensity={0.7 * b} distance={6} decay={2} color="#f0f4ff" />
-      <pointLight position={[-1.5, 0.5, -1.5]} intensity={0.7 * b} distance={6} decay={2} color="#f0f4ff" />
+      {/* Point lights — tył */}
+      <pointLight position={[ 0.5, 0,   -1.5]} intensity={1.22 * b} distance={6} decay={2} color="#f0f4ff" />
+      <pointLight position={[-0.5, 0,   -1.5]} intensity={1.22 * b} distance={6} decay={2} color="#f0f4ff" />
+
+      {/* Point lights — boki tył po skosie */}
+      <pointLight position={[ 1.5, 0.5, -1.5]} intensity={0.88 * b} distance={6} decay={2} color="#f0f4ff" />
+      <pointLight position={[-1.5, 0.5, -1.5]} intensity={0.88 * b} distance={6} decay={2} color="#f0f4ff" />
+
+      {/* Point lights — boki przód po skosie */}
+      <pointLight position={[ 1.5, 0.5,  1.2]} intensity={0.88 * b} distance={6} decay={2} color="#fff8f0" />
+      <pointLight position={[-1.5, 0.5,  1.2]} intensity={0.88 * b} distance={6} decay={2} color="#fff8f0" />
+
+      {/* Dedykowane światło na finger lift — wprost z przodu na wysokości dolnej sashki */}
+      <pointLight position={[0, -0.3, 2.0]} intensity={1.2 * b} distance={3} decay={2} color="#fff4e8" />
 
       <group position={[0, 0.18, 0]}>
         <Bounds fit margin={1.2}>
