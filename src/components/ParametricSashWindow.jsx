@@ -1502,7 +1502,6 @@ function ExternalBoxElement({ height, side = 'right', position, color = '#f0e6d3
       <mesh geometry={geometry} castShadow receiveShadow>
         <primitive object={extMaterial} attach="material" />
       </mesh>
-      <AxesGizmo origin={[0, 0, 0]} size={120} />
     </group>
   );
 }
@@ -1826,7 +1825,7 @@ export default function ParametricSashWindow({
   const sashDropY = meetingY_inJamb - pulleyLocalY_calc;
 
   return (
-    <group>
+    <group rotation={[0, Math.PI, 0]}>
       <JambWithPartingBead
         length={h}
         position={[-w / 2 + jambThickness / 2, sillVisibleHeight - jambEmbedIntoSill, 0]}

@@ -306,6 +306,55 @@ function ColorPicker({ label, value, onChange, inputId }) {
   );
 }
 
+function WallBackground() {
+  const texture = useMemo(() => {
+    const size = 1024;
+    const canvas = document.createElement('canvas');
+    canvas.width = size; canvas.height = size;
+    const ctx = canvas.getContext('2d');
+
+    // Gradient od ciemnego góra/boki do jasnego centrum
+    const grad = ctx.createRadialGradient(size*0.55, size*0.4, 0, size*0.55, size*0.4, size * 0.85);
+    grad.addColorStop(0,   '#d4d4d4');
+    grad.addColorStop(0.55,'#b4b4b4');
+    grad.addColorStop(1.0, '#787878');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, size, size);
+
+    // Tynk — drobny pył, inny niż microcement
+    for (let i = 0; i < 100000; i++) {
+      const x = Math.random() * size;
+      const y = Math.random() * size;
+      const r = Math.random() * 0.6;
+      const v = Math.floor(150 + Math.random() * 80);
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(${v},${v},${v},${Math.random() * 0.06})`;
+      ctx.fill();
+    }
+    // Poziome smugi tynku (inne niż pionowe smugi microcement)
+    for (let i = 0; i < 60; i++) {
+      const y = Math.random() * size;
+      ctx.strokeStyle = `rgba(160,160,160,${Math.random() * 0.04})`;
+      ctx.lineWidth = Math.random() * 1.2;
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(size, y + (Math.random()-0.5)*20);
+      ctx.stroke();
+    }
+
+    const tex = new THREE.CanvasTexture(canvas);
+    return tex;
+  }, []);
+
+  return (
+    <mesh position={[0, 0.5, -2.5]} rotation={[0, 0, 0]}>
+      <planeGeometry args={[12, 10]} />
+      <meshBasicMaterial map={texture} />
+    </mesh>
+  );
+}
+
 function MicrocementFloor() {
   const { colorMap, roughnessMap } = useMemo(() => {
     const size = 1024;
@@ -383,54 +432,7 @@ function MicrocementFloor() {
   );
 }
 
-function GradientBackground() {
-  const texture = useMemo(() => {
-    const size = 1024;
-    const canvas = document.createElement('canvas');
-    canvas.width = size; canvas.height = size;
-    const ctx = canvas.getContext('2d');
 
-    // Gradient od ciemnego góra/boki do jasnego centrum
-    const grad = ctx.createRadialGradient(size/2, size*0.4, 0, size/2, size*0.4, size * 0.8);
-    grad.addColorStop(0,   '#d8d8d8');
-    grad.addColorStop(0.6, '#b8b8b8');
-    grad.addColorStop(1.0, '#888888');
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, size, size);
-
-    // Tekstura tynku — drobny grain (inny niż microcement)
-    for (let i = 0; i < 80000; i++) {
-      const x = Math.random() * size;
-      const y = Math.random() * size;
-      const r = Math.random() * 0.8;
-      const v = Math.floor(160 + Math.random() * 60);
-      ctx.beginPath();
-      ctx.arc(x, y, r, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(${v},${v},${v},${Math.random() * 0.08})`;
-      ctx.fill();
-    }
-    // Pionowe smugi tynku
-    for (let i = 0; i < 40; i++) {
-      const x = Math.random() * size;
-      ctx.strokeStyle = `rgba(180,180,180,${Math.random() * 0.05})`;
-      ctx.lineWidth = Math.random() * 1.5;
-      ctx.beginPath();
-      ctx.moveTo(x, 0);
-      ctx.lineTo(x + (Math.random()-0.5)*30, size);
-      ctx.stroke();
-    }
-
-    const tex = new THREE.CanvasTexture(canvas);
-    return tex;
-  }, []);
-
-  return (
-    <mesh position={[0, 0, -3]} scale={[20, 20, 1]}>
-      <planeGeometry args={[1, 1]} />
-      <meshBasicMaterial map={texture} depthWrite={false} />
-    </mesh>
-  );
-}
 
 function Scene({ config }) {
   const [hovered, setHovered] = useState(false);
@@ -443,10 +445,8 @@ function Scene({ config }) {
 
   return (
     <>
-      <color attach="background" args={['#b0b0b0']} />
-      <GradientBackground />
 
-      <PerspectiveCamera makeDefault position={[2.2, 1.0, 3.8]} fov={32} />
+      <PerspectiveCamera makeDefault position={[2.4, 0.8, 3.6]} fov={32} />
 
       {/* Ambient */}
       <ambientLight intensity={0.56 * b} />
@@ -502,6 +502,7 @@ function Scene({ config }) {
         </Bounds>
       </group>
 
+      <WallBackground />
       <MicrocementFloor />
 
       <ContactShadows position={[0, -1.215, 0]} opacity={0.55} blur={2.5} far={3.5} scale={6} />
@@ -842,7 +843,7 @@ export default function App() {
       </aside>
 
       <main className="viewport">
-        <Canvas shadows dpr={[1, 2]}>
+        <Canvas shadows dpr={[1, 2]} gl={{ alpha: true }}>
           <Scene config={config} />
         </Canvas>
       </main>
