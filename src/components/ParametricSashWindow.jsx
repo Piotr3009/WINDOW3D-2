@@ -1277,6 +1277,7 @@ function PulleySet({
   plateOffsetX = mm(-10),
   mirrorX = false,
   weightStartY = -mm(646),
+  sashDropY = -mm(556),
 }) {
   const pulleyCordRadius = mm(18.8);
   const pulleyTravel = mm(travel);
@@ -1284,8 +1285,8 @@ function PulleySet({
   const cordPoints = buildPulleyCordPoints({
     center: [0, 0],
     radius: pulleyCordRadius,
-    leftDropY: -mm(556) - pulleyTravel,
-    rightDropY: -mm(556) + pulleyTravel,
+    leftDropY: sashDropY - pulleyTravel,
+    rightDropY: weightStartY + pulleyTravel,
     z: 0,
   });
 
@@ -1350,6 +1351,7 @@ function JambWithPartingBead({
   pulleyUpperTravel = 0,
   pulleyLowerTravel = 0,
   weightStartY = -mm(646),
+  sashDropY = -mm(556),
 }) {
   const jambDepth = mm(130);
   const jambHalf = mm(65);
@@ -1393,8 +1395,8 @@ function JambWithPartingBead({
 
       {showPulleyTestCutout && pulleyMaterial && (
         <>
-          <PulleySet x={pulleyLocalX} y={pulleyLocalY} z={mm(pulleyCutoutZCenter)} travel={pulleyUpperTravel} material={pulleyMaterial} showMarker={false} showAxes={false} plateOffsetX={mm(-10)} mirrorX={pulleyMirrorX} weightStartY={weightStartY} />
-          <PulleySet x={pulleyLocalX} y={pulleyLocalY} z={-mm(pulleyCutoutZCenter)} travel={pulleyLowerTravel} material={pulleyMaterial} showMarker={false} showAxes={false} plateOffsetX={mm(-10)} mirrorX={pulleyMirrorX} weightStartY={weightStartY} />
+          <PulleySet x={pulleyLocalX} y={pulleyLocalY} z={mm(pulleyCutoutZCenter)} travel={pulleyUpperTravel} material={pulleyMaterial} showMarker={false} showAxes={false} plateOffsetX={mm(-10)} mirrorX={pulleyMirrorX} weightStartY={weightStartY} sashDropY={sashDropY} />
+          <PulleySet x={pulleyLocalX} y={pulleyLocalY} z={-mm(pulleyCutoutZCenter)} travel={pulleyLowerTravel} material={pulleyMaterial} showMarker={false} showAxes={false} plateOffsetX={mm(-10)} mirrorX={pulleyMirrorX} weightStartY={weightStartY} sashDropY={sashDropY} />
         </>
       )}
 
@@ -1766,6 +1768,8 @@ export default function ParametricSashWindow({
   const meetingY_inJamb = meetingY - jambOriginY;
   const pulleyLocalY_calc = h / 2 - mm(100) - mm(64);
   const weightStartY = meetingY_inJamb - pulleyLocalY_calc;
+  // linka do sashki: od pulley (y=0 w lokalnych) do meeting railu
+  const sashDropY = meetingY_inJamb - pulleyLocalY_calc;
 
   return (
     <group>
@@ -1786,6 +1790,7 @@ export default function ParametricSashWindow({
         pulleyUpperTravel={upperPulleyTravel}
         pulleyLowerTravel={lowerPulleyTravel}
         weightStartY={weightStartY}
+        sashDropY={sashDropY}
       />
 
       <JambWithPartingBead
@@ -1805,6 +1810,7 @@ export default function ParametricSashWindow({
         pulleyUpperTravel={upperPulleyTravel}
         pulleyLowerTravel={lowerPulleyTravel}
         weightStartY={weightStartY}
+        sashDropY={sashDropY}
       />
 
       <JambWithPartingBead
@@ -1929,15 +1935,15 @@ export default function ParametricSashWindow({
       {showGuides && (
         <group>
           <DimensionGuide
-            from={[-w / 2, h / 2 + 0.18, 0]}
-            to={[w / 2, h / 2 + 0.18, 0]}
-            label={`${Math.round(width)} mm`}
+            from={[-(w / 2 + mm(52)), jambOriginY + h / 2 + mm(52) + mm(80), 0]}
+            to={[  w / 2 + mm(52),  jambOriginY + h / 2 + mm(52) + mm(80), 0]}
+            label={`${Math.round(width + 104)} mm`}
             offset={[0, 0.07, 0]}
           />
           <DimensionGuide
-            from={[w / 2 + 0.18, -h / 2 - sillVisibleHeight, 0]}
-            to={[w / 2 + 0.18, h / 2, 0]}
-            label={`${Math.round(height)} mm`}
+            from={[w / 2 + mm(52) + mm(180), -h / 2, 0]}
+            to={[  w / 2 + mm(52) + mm(180), jambOriginY + h / 2 + mm(52), 0]}
+            label={`${Math.round(height + 87)} mm`}
             offset={[0.09, 0, 0]}
           />
           <DimensionGuide
@@ -2028,7 +2034,7 @@ export default function ParametricSashWindow({
         const handleZ = trackRearZ + mm(sashDepth / 2) - mm(28); // exterior face górnej sashki -28mm
         return (
           <group position={[0, handleY, handleZ]} rotation={[Math.PI / 2, 0, 0]}>
-            <HandleMesh />
+            <HandleMesh mat={ironmongeryMats} />
           </group>
         );
       })()}
@@ -2212,8 +2218,8 @@ function FingerLift({ mat }) {
     </group>
   );
 }
-function HandleMesh() {
-  const material = useMemo(() => new THREE.MeshStandardMaterial({
+function HandleMesh({ mat }) {
+  const material = mat?.main || useMemo(() => new THREE.MeshStandardMaterial({
     color: '#b08d57', metalness: 0.85, roughness: 0.35,
   }), []);
 
