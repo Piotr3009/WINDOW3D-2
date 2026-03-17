@@ -190,7 +190,7 @@ function GlassPane({ size, position, frosted = false, doubleGlazing = false, spa
   const pane1Z =  (gapThickness / 2 + paneThickness / 2);
   const pane2Z = -(gapThickness / 2 + paneThickness / 2);
 
-  const spacerColorHex = spacerColor === 'silver' ? '#a0a4a8' : spacerColor === 'white' ? '#e8e8e4' : '#1a1a1a';
+  const spacerColorHex = spacerColor === 'silver' ? '#a0a4a8' : spacerColor === 'white' ? '#f8f8f8' : '#1a1a1a';
 
   const glassMat = frosted ? (
     <meshPhysicalMaterial
@@ -662,7 +662,7 @@ function GlazingBars({ clearWidth, clearHeight, glassDepth, barPattern = 'none',
 
   const spacerBarW = mm(18);
   const spacerDepth = mm(16);
-  const spacerColorHex = spacerColor === 'silver' ? '#a0a4a8' : spacerColor === 'white' ? '#e8e8e4' : '#1a1a1a';
+  const spacerColorHex = spacerColor === 'silver' ? '#a0a4a8' : spacerColor === 'white' ? '#f8f8f8' : '#1a1a1a';
   const spacerMat = useMemo(() => new THREE.MeshStandardMaterial({ color: spacerColorHex, metalness: 0.6, roughness: 0.4 }), [spacerColorHex]);
 
   const trapezoidGeom = useMemo(() => {
