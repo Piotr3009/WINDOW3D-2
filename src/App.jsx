@@ -385,18 +385,41 @@ function MicrocementFloor() {
 
 function GradientBackground() {
   const texture = useMemo(() => {
-    const size = 512;
+    const size = 1024;
     const canvas = document.createElement('canvas');
-    canvas.width = size;
-    canvas.height = size;
+    canvas.width = size; canvas.height = size;
     const ctx = canvas.getContext('2d');
-    // Gradient od ciemnego szarego na krawędziach do jasnego centrum
-    const grad = ctx.createRadialGradient(size/2, size/2, 0, size/2, size/2, size * 0.75);
-    grad.addColorStop(0,    '#e8e8e8'); // centrum jasne
-    grad.addColorStop(0.5,  '#c0c0c0'); // środek
-    grad.addColorStop(1.0,  '#787878'); // ciemne krawędzie
+
+    // Gradient od ciemnego góra/boki do jasnego centrum
+    const grad = ctx.createRadialGradient(size/2, size*0.4, 0, size/2, size*0.4, size * 0.8);
+    grad.addColorStop(0,   '#d8d8d8');
+    grad.addColorStop(0.6, '#b8b8b8');
+    grad.addColorStop(1.0, '#888888');
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, size, size);
+
+    // Tekstura tynku — drobny grain (inny niż microcement)
+    for (let i = 0; i < 80000; i++) {
+      const x = Math.random() * size;
+      const y = Math.random() * size;
+      const r = Math.random() * 0.8;
+      const v = Math.floor(160 + Math.random() * 60);
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(${v},${v},${v},${Math.random() * 0.08})`;
+      ctx.fill();
+    }
+    // Pionowe smugi tynku
+    for (let i = 0; i < 40; i++) {
+      const x = Math.random() * size;
+      ctx.strokeStyle = `rgba(180,180,180,${Math.random() * 0.05})`;
+      ctx.lineWidth = Math.random() * 1.5;
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x + (Math.random()-0.5)*30, size);
+      ctx.stroke();
+    }
+
     const tex = new THREE.CanvasTexture(canvas);
     return tex;
   }, []);
@@ -423,18 +446,18 @@ function Scene({ config }) {
       <color attach="background" args={['#b0b0b0']} />
       <GradientBackground />
 
-      <PerspectiveCamera makeDefault position={[0, 0.2, 4.2]} fov={32} />
+      <PerspectiveCamera makeDefault position={[2.2, 1.0, 3.8]} fov={32} />
 
       {/* Ambient */}
-      <ambientLight intensity={0.7 * b} />
+      <ambientLight intensity={0.56 * b} />
 
       {/* Hemisphere */}
-      <hemisphereLight args={['#fdf6e8', '#c8c0b0', 0.9 * b]} />
+      <hemisphereLight args={['#fdf6e8', '#c8c0b0', 0.72 * b]} />
 
       {/* Główne słońce */}
       <directionalLight
         position={[4, 6, 5]}
-        intensity={1.4 * b}
+        intensity={1.12 * b}
         castShadow
         shadow-mapSize-width={2048}
         shadow-mapSize-height={2048}
@@ -444,32 +467,32 @@ function Scene({ config }) {
       {/* Fill boki — symetrycznie przód i tył */}
       <directionalLight position={[-3, 2,  3]} intensity={0.6 * b} />
       <directionalLight position={[-3, 2, -3]} intensity={0.6 * b} />
-      <directionalLight position={[ 3, 2,  3]} intensity={0.7 * b} />
-      <directionalLight position={[ 3, 2, -3]} intensity={0.7 * b} />
+      <directionalLight position={[ 3, 2,  3]} intensity={0.56 * b} />
+      <directionalLight position={[ 3, 2, -3]} intensity={0.56 * b} />
 
       {/* Fill z dołu pod 45° — obydwie strony */}
       <directionalLight position={[-2, -2,  2]} intensity={0.25 * b} color="#e8d8c0" />
       <directionalLight position={[ 2, -2, -2]} intensity={0.25 * b} color="#e8d8c0" />
 
       {/* Point lights — przód */}
-      <pointLight position={[ 0.5, 0.5,  1.2]} intensity={1.22 * b} distance={6} decay={2} color="#fff8f0" />
-      <pointLight position={[-0.5, 0,    1.2]} intensity={1.22 * b} distance={6} decay={2} color="#fff4e8" />
+      <pointLight position={[ 0.5, 0.5,  1.2]} intensity={0.98 * b} distance={6} decay={2} color="#fff8f0" />
+      <pointLight position={[-0.5, 0,    1.2]} intensity={0.98 * b} distance={6} decay={2} color="#fff4e8" />
 
       {/* Point lights — tył */}
-      <pointLight position={[ 0.5, 0,   -1.5]} intensity={1.22 * b} distance={6} decay={2} color="#f0f4ff" />
-      <pointLight position={[-0.5, 0,   -1.5]} intensity={1.22 * b} distance={6} decay={2} color="#f0f4ff" />
+      <pointLight position={[ 0.5, 0,   -1.5]} intensity={0.98 * b} distance={6} decay={2} color="#f0f4ff" />
+      <pointLight position={[-0.5, 0,   -1.5]} intensity={0.98 * b} distance={6} decay={2} color="#f0f4ff" />
 
       {/* Point lights — boki tył po skosie */}
-      <pointLight position={[ 1.5, 0.5, -1.5]} intensity={0.88 * b} distance={6} decay={2} color="#f0f4ff" />
-      <pointLight position={[-1.5, 0.5, -1.5]} intensity={0.88 * b} distance={6} decay={2} color="#f0f4ff" />
+      <pointLight position={[ 1.5, 0.5, -1.5]} intensity={0.70 * b} distance={6} decay={2} color="#f0f4ff" />
+      <pointLight position={[-1.5, 0.5, -1.5]} intensity={0.70 * b} distance={6} decay={2} color="#f0f4ff" />
 
       {/* Point lights — boki przód po skosie */}
-      <pointLight position={[ 1.5, 0.5,  1.2]} intensity={0.88 * b} distance={6} decay={2} color="#fff8f0" />
-      <pointLight position={[-1.5, 0.5,  1.2]} intensity={0.88 * b} distance={6} decay={2} color="#fff8f0" />
+      <pointLight position={[ 1.5, 0.5,  1.2]} intensity={0.70 * b} distance={6} decay={2} color="#fff8f0" />
+      <pointLight position={[-1.5, 0.5,  1.2]} intensity={0.70 * b} distance={6} decay={2} color="#fff8f0" />
 
       {/* Dedykowane światła na finger lift — z tyłu okna */}
-      <pointLight position={[ 0.4, -0.3, -2.0]} intensity={1.2 * b} distance={3} decay={2} color="#f0f4ff" />
-      <pointLight position={[-0.4, -0.3, -2.0]} intensity={1.2 * b} distance={3} decay={2} color="#f0f4ff" />
+      <pointLight position={[ 0.4, -0.3, -2.0]} intensity={0.96 * b} distance={3} decay={2} color="#f0f4ff" />
+      <pointLight position={[-0.4, -0.3, -2.0]} intensity={0.96 * b} distance={3} decay={2} color="#f0f4ff" />
 
       <group position={[0, 0.18, 0]}>
         <Bounds fit margin={1.2}>
