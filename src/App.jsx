@@ -316,8 +316,8 @@ function Scene({ config }) {
 
   return (
     <>
-      <color attach="background" args={['#ebe6de']} />
-      <fog attach="fog" args={['#ebe6de', 7, 14]} />
+      <color attach="background" args={['#cccccc']} />
+      <fog attach="fog" args={['#cccccc', 7, 14]} />
 
       <PerspectiveCamera makeDefault position={[2.75, 1.65, 3.8]} fov={32} />
 
