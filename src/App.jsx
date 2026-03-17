@@ -273,6 +273,7 @@ function ColorPicker({ label, value, onChange, inputId }) {
             <option value="#73806e">Card Room Green 79</option>
             <option value="#7a8868">Saxon Green 80</option>
             <option value="#5a7048">Pea Green 33</option>
+            <option value="#bbbe9f">Vert de Terre 234</option>
             <option value="#a0a88c">Lichen 19</option>
             <option value="#708068">Chappell Green 83</option>
           </optgroup>
@@ -306,6 +307,7 @@ function ColorPicker({ label, value, onChange, inputId }) {
 
 function Scene({ config }) {
   const [hovered, setHovered] = useState(false);
+  const b = config.brightness ?? 1.0;
 
   const pedestalScale = useMemo(() => {
     const maxDimension = Math.max(config.width, config.height) / 1000;
@@ -320,15 +322,15 @@ function Scene({ config }) {
       <PerspectiveCamera makeDefault position={[2.75, 1.65, 3.8]} fov={32} />
 
       {/* Ambient — delikatne, nie przepali kolorów */}
-      <ambientLight intensity={0.4} />
+      <ambientLight intensity={0.4 * b} />
 
       {/* Hemisphere — niebo ciepłe, podłoga chłodna */}
-      <hemisphereLight args={['#fdf6e8', '#c8c0b0', 0.6]} />
+      <hemisphereLight args={['#fdf6e8', '#c8c0b0', 0.6 * b]} />
 
       {/* Główne słońce — góra-prawy-przód, rzuca cienie */}
       <directionalLight
         position={[4, 6, 5]}
-        intensity={1.4}
+        intensity={1.4 * b}
         castShadow
         shadow-mapSize-width={2048}
         shadow-mapSize-height={2048}
@@ -336,21 +338,21 @@ function Scene({ config }) {
       />
 
       {/* Fill lewy — miękkie wypełnienie cieni */}
-      <directionalLight position={[-3, 2, 3]} intensity={0.5} />
+      <directionalLight position={[-3, 2, 3]} intensity={0.5 * b} />
 
       {/* Fill tylny — oświetla tył okna i ironmongery */}
-      <directionalLight position={[0, 3, -4]} intensity={0.7} />
+      <directionalLight position={[0, 3, -4]} intensity={0.7 * b} />
 
       {/* Światło z dołu — symuluje odbicie od podłogi */}
-      <directionalLight position={[0, -2, 2]} intensity={0.2} color="#e8d8c0" />
+      <directionalLight position={[0, -2, 2]} intensity={0.2 * b} color="#e8d8c0" />
 
       {/* Point lights — mocny połysk na mosiądzu i metalach */}
-      <pointLight position={[0.5, 0.5, 1.2]} intensity={1.0} distance={6} decay={2} color="#fff8f0" />
-      <pointLight position={[-0.5, 0, 1.2]} intensity={0.7} distance={6} decay={2} color="#fff4e8" />
-      <pointLight position={[0.5, 0, -1.5]} intensity={1.0} distance={6} decay={2} color="#f0f4ff" />
-      <pointLight position={[-0.5, 0, -1.5]} intensity={1.0} distance={6} decay={2} color="#f0f4ff" />
-      <pointLight position={[1.5, 0.5, -1.5]} intensity={0.7} distance={6} decay={2} color="#f0f4ff" />
-      <pointLight position={[-1.5, 0.5, -1.5]} intensity={0.7} distance={6} decay={2} color="#f0f4ff" />
+      <pointLight position={[0.5, 0.5, 1.2]} intensity={1.0 * b} distance={6} decay={2} color="#fff8f0" />
+      <pointLight position={[-0.5, 0, 1.2]} intensity={0.7 * b} distance={6} decay={2} color="#fff4e8" />
+      <pointLight position={[0.5, 0, -1.5]} intensity={1.0 * b} distance={6} decay={2} color="#f0f4ff" />
+      <pointLight position={[-0.5, 0, -1.5]} intensity={1.0 * b} distance={6} decay={2} color="#f0f4ff" />
+      <pointLight position={[1.5, 0.5, -1.5]} intensity={0.7 * b} distance={6} decay={2} color="#f0f4ff" />
+      <pointLight position={[-1.5, 0.5, -1.5]} intensity={0.7 * b} distance={6} decay={2} color="#f0f4ff" />
 
       <group position={[0, 0.18, 0]}>
         <Bounds fit margin={1.2}>
@@ -403,7 +405,9 @@ export default function App() {
   const [autoRotate, setAutoRotate] = useState(false);
   const [showGuides, setShowGuides] = useState(true);
   const [showHorns, setShowHorns] = useState(true);
+  const [brightness, setBrightness] = useState(1.0);
   const [hornType, setHornType] = useState('A');
+  const [ironmongery, setIronmongery] = useState('brass');
   const [upperGlass, setUpperGlass] = useState('clear');
   const [lowerGlass, setLowerGlass] = useState('clear');
   const [boxType, setBoxType] = useState('standard');
@@ -436,8 +440,10 @@ export default function App() {
       showGuides,
       showHorns,
       hornType,
+      ironmongery,
       upperGlass,
       lowerGlass,
+      brightness,
       boxDepth: boxType === 'standard' ? 164 : 146,
       sashDepth: 57,
       boxType,
@@ -449,7 +455,7 @@ export default function App() {
       woodColorExt: sameColor ? woodColor : woodColorExt,
       woodColorInt: sameColor ? woodColor : woodColorInt,
     }),
-    [width, height, opening, upperOpening, autoRotate, showGuides, showHorns, hornType, upperGlass, lowerGlass, boxType, upperBars, lowerBars, upperCustomBars, lowerCustomBars, woodColor, woodColorExt, woodColorInt, sameColor],
+    [width, height, opening, upperOpening, autoRotate, showGuides, showHorns, hornType, ironmongery, upperGlass, lowerGlass, brightness, boxType, upperBars, lowerBars, upperCustomBars, lowerCustomBars, woodColor, woodColorExt, woodColorInt, sameColor],
   );
 
   return (
@@ -639,6 +645,16 @@ export default function App() {
           </div>
           <Toggle label="Auto rotate" checked={autoRotate} onChange={setAutoRotate} />
           <Toggle label="Show guide dimensions" checked={showGuides} onChange={setShowGuides} />
+          <Slider label="Brightness" value={Math.round((brightness - 1) * 100)} min={-30} max={30} step={5} suffix="%" onChange={(v) => setBrightness(1 + v / 100)} />
+          <label className="select-wrap">
+            <span>Ironmongery finish</span>
+            <select value={ironmongery} onChange={(e) => setIronmongery(e.target.value)}>
+              <option value="brass">Brass</option>
+              <option value="chrome">Chrome</option>
+              <option value="stainless">Stainless Steel</option>
+              <option value="antique_brass">Antique Brass</option>
+            </select>
+          </label>
           <label className="select-wrap">
             <span>Sash horns</span>
             <select value={showHorns ? hornType : 'none'} onChange={(e) => {

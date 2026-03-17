@@ -1640,9 +1640,41 @@ export default function ParametricSashWindow({
   hornType = 'A',
   upperGlass = 'clear',
   lowerGlass = 'clear',
+  ironmongery = 'brass',
 }) {
   const cExt = woodColorExt || woodColor;
   const cInt = woodColorInt || woodColor;
+
+  const ironmongeryMats = useMemo(() => {
+    const defs = {
+      brass: {
+        main:  { color: '#d4af37', metalness: 0.92, roughness: 0.18 },
+        dark:  { color: '#b38728', metalness: 0.92, roughness: 0.26 },
+        screw: { color: '#7a5a16', metalness: 0.7,  roughness: 0.38 },
+      },
+      chrome: {
+        main:  { color: '#e8eaec', metalness: 1.0,  roughness: 0.04 },
+        dark:  { color: '#c8cacc', metalness: 1.0,  roughness: 0.08 },
+        screw: { color: '#a8aaac', metalness: 0.95, roughness: 0.12 },
+      },
+      stainless: {
+        main:  { color: '#c8c8c8', metalness: 0.9,  roughness: 0.25 },
+        dark:  { color: '#a8a8a8', metalness: 0.9,  roughness: 0.32 },
+        screw: { color: '#888888', metalness: 0.85, roughness: 0.38 },
+      },
+      antique_brass: {
+        main:  { color: '#9c7722', metalness: 0.75, roughness: 0.42 },
+        dark:  { color: '#7a5810', metalness: 0.72, roughness: 0.52 },
+        screw: { color: '#5c3e08', metalness: 0.65, roughness: 0.58 },
+      },
+    };
+    const d = defs[ironmongery] || defs.brass;
+    return {
+      main:  new THREE.MeshStandardMaterial(d.main),
+      dark:  new THREE.MeshStandardMaterial(d.dark),
+      screw: new THREE.MeshStandardMaterial(d.screw),
+    };
+  }, [ironmongery]);
 
   const jambMaterial    = useMemo(() => new THREE.MeshPhysicalMaterial({ color: cExt, roughness: 0.72, metalness: 0.02, clearcoat: 0.06, clearcoatRoughness: 0.4 }), [cExt]);
   const jambIntMaterial = useMemo(() => new THREE.MeshPhysicalMaterial({ color: cInt, roughness: 0.72, metalness: 0.02, clearcoat: 0.06, clearcoatRoughness: 0.4 }), [cInt]);
@@ -1652,18 +1684,23 @@ export default function ParametricSashWindow({
   const sillIntMaterial = useMemo(() => new THREE.MeshPhysicalMaterial({ color: cInt, roughness: 0.42, metalness: 0.02, clearcoat: 0.22, clearcoatRoughness: 0.12, side: THREE.DoubleSide }), [cInt]);
 
   const pulleyPlateMaterial = useMemo(
-    () =>
-      new THREE.MeshPhysicalMaterial({
-        color: '#c9a227',
-        roughness: 0.34,
-        metalness: 0.82,
+    () => new THREE.MeshPhysicalMaterial({
+        ...(() => {
+          const defs = {
+            brass:         { color: '#c9a227', roughness: 0.34, metalness: 0.82 },
+            chrome:        { color: '#e0e2e4', roughness: 0.05, metalness: 1.0  },
+            stainless:     { color: '#c0c0c0', roughness: 0.28, metalness: 0.9  },
+            antique_brass: { color: '#8b6914', roughness: 0.48, metalness: 0.75 },
+          };
+          return defs[ironmongery] || defs.brass;
+        })(),
         clearcoat: 0.18,
         clearcoatRoughness: 0.14,
         polygonOffset: true,
         polygonOffsetFactor: -2,
         polygonOffsetUnits: -2,
       }),
-    []
+    [ironmongery]
   );
 
   const config = {
@@ -1932,10 +1969,10 @@ export default function ParametricSashWindow({
         return xPositions.map((x, i) => (
           <group key={i}>
             <group position={[x, bodyY, bodyZ]} rotation={[Math.PI / 2, Math.PI, Math.PI]} scale={0.001}>
-              <FitchFastenerBody />
+              <FitchFastenerBody mat={ironmongeryMats} />
             </group>
             <group position={[x, keepY, keepZ]} rotation={[Math.PI / 2, Math.PI, Math.PI]} scale={0.001}>
-              <FitchFastenerKeep />
+              <FitchFastenerKeep mat={ironmongeryMats} />
             </group>
           </group>
         ));
@@ -1963,7 +2000,7 @@ export default function ParametricSashWindow({
         const stopperZ = trackRearZ - mm(sashDepth / 2);
         const leftX  = -mm(sashWidth / 2) + mm(config.stileWidth / 2);
         const rightX =  mm(sashWidth / 2) - mm(config.stileWidth / 2);
-        const stopperMaterial = new THREE.MeshStandardMaterial({ color: '#d4af37', metalness: 0.92, roughness: 0.18 });
+        const stopperMaterial = ironmongeryMats.main;
         return [leftX, rightX].map((x, i) => (
           <mesh key={i} position={[x, stopperY, stopperZ]} rotation={[Math.PI / 2, 0, 0]} castShadow receiveShadow>
             <cylinderGeometry args={[mm(8), mm(8), mm(40), 32]} />
@@ -1979,7 +2016,7 @@ export default function ParametricSashWindow({
         const xRight =  mm(sashWidth / 2 - 200);
         return [xLeft, xRight].map((x, i) => (
           <group key={i} position={[x, liftY, liftZ]} rotation={[0, Math.PI, 0]} scale={0.022}>
-            <FingerLift />
+            <FingerLift mat={ironmongeryMats} />
           </group>
         ));
       })()}
@@ -2001,12 +2038,12 @@ export default function ParametricSashWindow({
 }
 
 
-function FitchFastenerBody() {
+function FitchFastenerBody({ mat }) {
   const [isLocked, setIsLocked] = useState(true);
   const leverGroupRef = useRef();
-  const brassMaterial = useMemo(() => new THREE.MeshStandardMaterial({ color: '#d4af37', metalness: 0.92, roughness: 0.18 }), []);
-  const brassDarkMaterial = useMemo(() => new THREE.MeshStandardMaterial({ color: '#b38728', metalness: 0.92, roughness: 0.26 }), []);
-  const steelShadowMaterial = useMemo(() => new THREE.MeshStandardMaterial({ color: '#7a5a16', metalness: 0.7, roughness: 0.38 }), []);
+  const brassMaterial = mat?.main || useMemo(() => new THREE.MeshStandardMaterial({ color: '#d4af37', metalness: 0.92, roughness: 0.18 }), []);
+  const brassDarkMaterial = mat?.dark || useMemo(() => new THREE.MeshStandardMaterial({ color: '#b38728', metalness: 0.92, roughness: 0.26 }), []);
+  const steelShadowMaterial = mat?.screw || useMemo(() => new THREE.MeshStandardMaterial({ color: '#7a5a16', metalness: 0.7, roughness: 0.38 }), []);
   const mainBaseShape = useMemo(() => {
     const s = new THREE.Shape();
     const halfW = 37.5, bottomY = 0, shoulderY = 18, neckY = 28, topY = 36;
@@ -2065,10 +2102,10 @@ function FitchFastenerBody() {
   );
 }
 
-function FitchFastenerKeep() {
-  const brassMaterial = useMemo(() => new THREE.MeshStandardMaterial({ color: '#d4af37', metalness: 0.92, roughness: 0.18 }), []);
-  const brassDarkMaterial = useMemo(() => new THREE.MeshStandardMaterial({ color: '#b38728', metalness: 0.92, roughness: 0.26 }), []);
-  const steelShadowMaterial = useMemo(() => new THREE.MeshStandardMaterial({ color: '#7a5a16', metalness: 0.7, roughness: 0.38 }), []);
+function FitchFastenerKeep({ mat }) {
+  const brassMaterial = mat?.main || useMemo(() => new THREE.MeshStandardMaterial({ color: '#d4af37', metalness: 0.92, roughness: 0.18 }), []);
+  const brassDarkMaterial = mat?.dark || useMemo(() => new THREE.MeshStandardMaterial({ color: '#b38728', metalness: 0.92, roughness: 0.26 }), []);
+  const steelShadowMaterial = mat?.screw || useMemo(() => new THREE.MeshStandardMaterial({ color: '#7a5a16', metalness: 0.7, roughness: 0.38 }), []);
   const keepBaseShape = useMemo(() => {
     const s = new THREE.Shape();
     const halfW = 37.5, h = 10;
@@ -2103,8 +2140,8 @@ function FitchFastenerKeep() {
   );
 }
 
-function FingerLift() {
-  const goldMaterial = useMemo(() => new THREE.MeshStandardMaterial({
+function FingerLift({ mat }) {
+  const goldMaterial = mat?.main || useMemo(() => new THREE.MeshStandardMaterial({
     color: '#d4af37', metalness: 0.85, roughness: 0.22,
   }), []);
 
