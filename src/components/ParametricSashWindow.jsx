@@ -179,47 +179,81 @@ function createFrostedTexture() {
   return texture;
 }
 
-function GlassPane({ size, position, frosted = false }) {
+function GlassPane({ size, position, frosted = false, doubleGlazing = false, spacerColor = 'silver' }) {
   const [w, h, d] = size;
   const frostedTexture = useMemo(() => frosted ? createFrostedTexture() : null, [frosted]);
 
+  // Double glazing: 4mm + 16mm spacer + 4mm = 24mm total
+  const paneThickness = mm(4);
+  const gapThickness  = mm(16);
+  const spacerWidth   = mm(8);  // widoczna szerokość spacera na krawędzi
+  const pane1Z =  (gapThickness / 2 + paneThickness / 2);
+  const pane2Z = -(gapThickness / 2 + paneThickness / 2);
+
+  const spacerColorHex = spacerColor === 'silver' ? '#a0a4a8' : spacerColor === 'white' ? '#e8e8e4' : '#1a1a1a';
+
+  const glassMat = frosted ? (
+    <meshPhysicalMaterial
+      color="#c8dce8" roughness={1.0} metalness={0}
+      transmission={0.15} transparent opacity={0.96}
+      thickness={0.028} ior={1.52}
+      map={frostedTexture} roughnessMap={frostedTexture}
+    />
+  ) : (
+    <meshPhysicalMaterial
+      color="#cfe3f5" roughness={0.015} metalness={0}
+      transmission={0.985} transparent opacity={0.52}
+      thickness={0.028} ior={1.52} clearcoat={1}
+      clearcoatRoughness={0.01} reflectivity={0.9}
+    />
+  );
+
+  if (!doubleGlazing) {
+    return (
+      <group position={position}>
+        <mesh castShadow={false} receiveShadow>
+          <boxGeometry args={[w, h, d]} />
+          {glassMat}
+        </mesh>
+        <GlassReflections width={w} height={h} z={d / 2 + 0.001} />
+      </group>
+    );
+  }
+
   return (
     <group position={position}>
-      <mesh castShadow={false} receiveShadow>
-        <boxGeometry args={[w, h, d]} />
-        {frosted ? (
-          <meshPhysicalMaterial
-            color="#c8dce8"
-            roughness={1.0}
-            metalness={0}
-            transmission={0.15}
-            transparent
-            opacity={0.96}
-            thickness={0.028}
-            ior={1.52}
-            clearcoat={0.0}
-            clearcoatRoughness={1.0}
-            map={frostedTexture}
-            roughnessMap={frostedTexture}
-          />
-        ) : (
-          <meshPhysicalMaterial
-            color="#cfe3f5"
-            roughness={0.015}
-            metalness={0}
-            transmission={0.985}
-            transparent
-            opacity={0.52}
-            thickness={0.028}
-            ior={1.52}
-            clearcoat={1}
-            clearcoatRoughness={0.01}
-            reflectivity={0.9}
-          />
-        )}
+      {/* Szyba przednia */}
+      <mesh castShadow={false} receiveShadow position={[0, 0, pane1Z]}>
+        <boxGeometry args={[w, h, paneThickness]} />
+        {glassMat}
       </mesh>
-
-      <GlassReflections width={w} height={h} z={d / 2 + 0.001} />
+      {/* Szyba tylna */}
+      <mesh castShadow={false} receiveShadow position={[0, 0, pane2Z]}>
+        <boxGeometry args={[w, h, paneThickness]} />
+        {glassMat}
+      </mesh>
+      {/* Spacery — 4 krawędzie */}
+      {/* Góra */}
+      <mesh position={[0,  h / 2 - spacerWidth / 2, 0]}>
+        <boxGeometry args={[w, spacerWidth, gapThickness]} />
+        <meshStandardMaterial color={spacerColorHex} metalness={0.6} roughness={0.4} />
+      </mesh>
+      {/* Dół */}
+      <mesh position={[0, -h / 2 + spacerWidth / 2, 0]}>
+        <boxGeometry args={[w, spacerWidth, gapThickness]} />
+        <meshStandardMaterial color={spacerColorHex} metalness={0.6} roughness={0.4} />
+      </mesh>
+      {/* Lewo */}
+      <mesh position={[-w / 2 + spacerWidth / 2, 0, 0]}>
+        <boxGeometry args={[spacerWidth, h - spacerWidth * 2, gapThickness]} />
+        <meshStandardMaterial color={spacerColorHex} metalness={0.6} roughness={0.4} />
+      </mesh>
+      {/* Prawo */}
+      <mesh position={[w / 2 - spacerWidth / 2, 0, 0]}>
+        <boxGeometry args={[spacerWidth, h - spacerWidth * 2, gapThickness]} />
+        <meshStandardMaterial color={spacerColorHex} metalness={0.6} roughness={0.4} />
+      </mesh>
+      <GlassReflections width={w} height={h} z={pane1Z + paneThickness / 2 + 0.001} />
     </group>
   );
 }
@@ -802,6 +836,8 @@ function Sash({
   colorExt = null,
   colorInt = null,
   frosted = false,
+  doubleGlazing = false,
+  spacerColor = 'silver',
 }) {
   const colorE = colorExt || color;
   const colorI = colorInt || color;
@@ -882,7 +918,7 @@ function Sash({
         </>
       )}
 
-      <GlassPane size={[clearWidth, clearHeight, glassD]} position={[0, glassY, glassCenterZ]} frosted={frosted} />
+      <GlassPane size={[clearWidth, clearHeight, glassD]} position={[0, glassY, glassCenterZ]} frosted={frosted} doubleGlazing={doubleGlazing} spacerColor={spacerColor} />
       <group position={[0, glassY, glassCenterZ]}>
         <GlazingBars clearWidth={clearWidth} clearHeight={clearHeight} glassDepth={glassD} barPattern={barPattern} customBars={customBars} material={extCoreMaterial} materialInt={intCoreMaterial} />
       </group>
@@ -1642,6 +1678,8 @@ export default function ParametricSashWindow({
   hornType = 'A',
   upperGlass = 'clear',
   lowerGlass = 'clear',
+  doubleGlazing = false,
+  spacerColor = 'silver',
   ironmongery = 'brass',
 }) {
   const cExt = woodColorExt || woodColor;
@@ -1910,6 +1948,8 @@ export default function ParametricSashWindow({
         colorExt={cExt}
         colorInt={cInt}
         frosted={upperGlass === 'frosted'}
+        doubleGlazing={doubleGlazing}
+        spacerColor={spacerColor}
       />
 
       <Sash
@@ -1930,6 +1970,8 @@ export default function ParametricSashWindow({
         colorExt={cExt}
         colorInt={cInt}
         frosted={lowerGlass === 'frosted'}
+        doubleGlazing={doubleGlazing}
+        spacerColor={spacerColor}
       />
 
       {showGuides && (
