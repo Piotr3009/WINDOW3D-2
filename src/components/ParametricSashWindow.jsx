@@ -1990,7 +1990,7 @@ export default function ParametricSashWindow({
       />
 
       {showGuides && (
-        <group>
+        <group rotation={[0, Math.PI, 0]}>
           <DimensionGuide
             from={[-(w / 2 + mm(52)), jambOriginY + h / 2 + mm(52) + mm(80), 0]}
             to={[  w / 2 + mm(52),  jambOriginY + h / 2 + mm(52) + mm(80), 0]}
