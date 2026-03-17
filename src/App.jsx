@@ -2,6 +2,7 @@ import React from 'react';
 import { Canvas } from '@react-three/fiber';
 import { Bounds, ContactShadows, Html, OrbitControls, PerspectiveCamera } from '@react-three/drei';
 import { useMemo, useState } from 'react';
+import * as THREE from 'three';
 import ParametricSashWindow from './components/ParametricSashWindow';
 
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
@@ -305,6 +306,32 @@ function ColorPicker({ label, value, onChange, inputId }) {
   );
 }
 
+function GradientBackground() {
+  const texture = useMemo(() => {
+    const size = 512;
+    const canvas = document.createElement('canvas');
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext('2d');
+    // Gradient od ciemnego szarego na krawędziach do jasnego centrum
+    const grad = ctx.createRadialGradient(size/2, size/2, 0, size/2, size/2, size * 0.75);
+    grad.addColorStop(0,    '#e8e8e8'); // centrum jasne
+    grad.addColorStop(0.5,  '#c0c0c0'); // środek
+    grad.addColorStop(1.0,  '#787878'); // ciemne krawędzie
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, size, size);
+    const tex = new THREE.CanvasTexture(canvas);
+    return tex;
+  }, []);
+
+  return (
+    <mesh position={[0, 0, -3]} scale={[20, 20, 1]}>
+      <planeGeometry args={[1, 1]} />
+      <meshBasicMaterial map={texture} depthWrite={false} />
+    </mesh>
+  );
+}
+
 function Scene({ config }) {
   const [hovered, setHovered] = useState(false);
   const b = config.brightness ?? 1.0;
@@ -316,10 +343,10 @@ function Scene({ config }) {
 
   return (
     <>
-      <color attach="background" args={['#ebe6de']} />
-      <fog attach="fog" args={['#ebe6de', 7, 14]} />
+      <color attach="background" args={['#b0b0b0']} />
+      <GradientBackground />
 
-      <PerspectiveCamera makeDefault position={[2.75, 1.65, 3.8]} fov={32} />
+      <PerspectiveCamera makeDefault position={[0, 0.2, 4.2]} fov={32} />
 
       {/* Ambient */}
       <ambientLight intensity={0.4 * b} />
@@ -376,10 +403,10 @@ function Scene({ config }) {
 
       <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.3, 0]}>
         <planeGeometry args={[20, 20]} />
-        <meshStandardMaterial color="#dfd7cb" roughness={1} />
+        <meshStandardMaterial color="#d8d8d8" roughness={0.8} metalness={0.05} />
       </mesh>
 
-      <ContactShadows position={[0, -1.215, 0]} opacity={0.35} blur={2} far={3.2} scale={5} />
+      <ContactShadows position={[0, -1.215, 0]} opacity={0.55} blur={2.5} far={3.5} scale={6} />
 
       <OrbitControls
         makeDefault
@@ -405,8 +432,10 @@ function Scene({ config }) {
 }
 
 export default function App() {
-  const [width, setWidth] = useState(1000);
-  const [height, setHeight] = useState(1500);
+  const [extWidth, setExtWidth] = useState(1200);
+  const [extHeight, setExtHeight] = useState(1500);
+  const width = extWidth - 104;
+  const height = extHeight - 87;
   const [opening, setOpening] = useState(0);
   const [upperOpening, setUpperOpening] = useState(0);
   const [autoRotate, setAutoRotate] = useState(false);
@@ -420,9 +449,9 @@ export default function App() {
   const doubleGlazing = true;
   const [spacerColor, setSpacerColor] = useState('silver');
   const [boxType, setBoxType] = useState('standard');
-  const [woodColor, setWoodColor] = useState('#f0e6d3');
-  const [woodColorExt, setWoodColorExt] = useState('#f0e6d3');
-  const [woodColorInt, setWoodColorInt] = useState('#f0e6d3');
+  const [woodColor, setWoodColor] = useState('#F6F6F6');
+  const [woodColorExt, setWoodColorExt] = useState('#F6F6F6');
+  const [woodColorInt, setWoodColorInt] = useState('#F6F6F6');
   const [sameColor, setSameColor] = useState(true);
 
   const setColor = (hex) => {
@@ -481,8 +510,8 @@ export default function App() {
 
         <div className="card">
           <h2>Size</h2>
-          <Slider label="Width" value={width} min={600} max={1800} step={10} onChange={setWidth} />
-          <Slider label="Height" value={height} min={800} max={3000} step={10} onChange={setHeight} />
+          <Slider label="Width" value={extWidth} min={704} max={1904} step={10} onChange={setExtWidth} />
+          <Slider label="Height" value={extHeight} min={887} max={3087} step={10} onChange={setExtHeight} />
           <Slider
             label="Lower sash opening"
             value={opening}

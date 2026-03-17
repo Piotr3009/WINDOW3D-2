@@ -185,15 +185,6 @@ select {
   position: relative;
 }
 
-.viewport::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(ellipse at center, transparent 30%, rgba(60, 50, 40, 0.35) 100%);
-  pointer-events: none;
-  z-index: 1;
-}
-
 .viewport canvas {
   display: block;
 }
