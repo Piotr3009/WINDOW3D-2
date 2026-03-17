@@ -412,7 +412,7 @@ export default function App() {
   const [ironmongery, setIronmongery] = useState('brass');
   const [upperGlass, setUpperGlass] = useState('clear');
   const [lowerGlass, setLowerGlass] = useState('clear');
-  const [doubleGlazing, setDoubleGlazing] = useState(false);
+  const doubleGlazing = true;
   const [spacerColor, setSpacerColor] = useState('silver');
   const [boxType, setBoxType] = useState('standard');
   const [woodColor, setWoodColor] = useState('#f0e6d3');
@@ -620,17 +620,14 @@ export default function App() {
 
         <div className="card">
           <h2>Glass</h2>
-          <Toggle label="Double glazing 4×16×4" checked={doubleGlazing} onChange={setDoubleGlazing} />
-          {doubleGlazing && (
-            <label className="select-wrap">
-              <span>Spacer colour</span>
-              <select value={spacerColor} onChange={(e) => setSpacerColor(e.target.value)}>
-                <option value="silver">Silver</option>
-                <option value="white">White</option>
-                <option value="black">Black</option>
-              </select>
-            </label>
-          )}
+          <label className="select-wrap">
+            <span>Spacer colour</span>
+            <select value={spacerColor} onChange={(e) => setSpacerColor(e.target.value)}>
+              <option value="silver">Silver</option>
+              <option value="white">White</option>
+              <option value="black">Black</option>
+            </select>
+          </label>
           <label className="select-wrap">
             <span>Upper sash</span>
             <select value={upperGlass} onChange={(e) => setUpperGlass(e.target.value)}>

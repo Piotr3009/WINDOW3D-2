@@ -186,7 +186,7 @@ function GlassPane({ size, position, frosted = false, doubleGlazing = false, spa
   // Double glazing: 4mm + 16mm spacer + 4mm = 24mm total
   const paneThickness = mm(4);
   const gapThickness  = mm(16);
-  const spacerWidth   = mm(8);  // widoczna szerokość spacera na krawędzi
+  const spacerWidth   = mm(1);  // widoczna szerokość spacera na krawędzi
   const pane1Z =  (gapThickness / 2 + paneThickness / 2);
   const pane2Z = -(gapThickness / 2 + paneThickness / 2);
 
@@ -201,10 +201,10 @@ function GlassPane({ size, position, frosted = false, doubleGlazing = false, spa
     />
   ) : (
     <meshPhysicalMaterial
-      color="#cfe3f5" roughness={0.015} metalness={0}
-      transmission={0.985} transparent opacity={0.52}
-      thickness={0.028} ior={1.52} clearcoat={1}
-      clearcoatRoughness={0.01} reflectivity={0.9}
+      color="#cfe3f5" roughness={0.12} metalness={0}
+      transmission={0.92} transparent opacity={0.38}
+      thickness={0.028} ior={1.22} clearcoat={0.07}
+      clearcoatRoughness={0.05} reflectivity={0.15}
     />
   );
 
@@ -652,13 +652,18 @@ const BAR_PATTERNS = {
   'custom': null,
 };
 
-function GlazingBars({ clearWidth, clearHeight, glassDepth, barPattern = 'none', customBars = [], material, materialInt }) {
+function GlazingBars({ clearWidth, clearHeight, glassDepth, barPattern = 'none', customBars = [], material, materialInt, doubleGlazing = false, spacerColor = 'silver' }) {
   const pattern = BAR_PATTERNS[barPattern];
   const barW = mm(22);
   const barH = mm(16.5);
   const barTop = mm(2);
   const glassHalf = glassDepth / 2;
   const matInt = materialInt || material;
+
+  const spacerBarW = mm(18);
+  const spacerDepth = mm(16);
+  const spacerColorHex = spacerColor === 'silver' ? '#a0a4a8' : spacerColor === 'white' ? '#e8e8e4' : '#1a1a1a';
+  const spacerMat = useMemo(() => new THREE.MeshStandardMaterial({ color: spacerColorHex, metalness: 0.6, roughness: 0.4 }), [spacerColorHex]);
 
   const trapezoidGeom = useMemo(() => {
     const shape = new THREE.Shape();
@@ -801,6 +806,7 @@ function GlazingBars({ clearWidth, clearHeight, glassDepth, barPattern = 'none',
       {bars.map((bar, i) => {
         const geom = bar.type === 'v' ? vGeom : hGeom;
         const geomInt = bar.type === 'v' ? vGeomInt : hGeomInt;
+        const sLen = bar.type === 'v' ? clearHeight : clearWidth;
         return (
           <group key={i} position={[bar.x, bar.y, 0]}>
             {/* exterior side - trapez */}
@@ -811,6 +817,16 @@ function GlazingBars({ clearWidth, clearHeight, glassDepth, barPattern = 'none',
             <mesh geometry={geom} position={[0, 0, glassHalf]} rotation={[Math.PI, 0, 0]} castShadow receiveShadow>
               <primitive object={material} attach="material" />
             </mesh>
+            {/* DG spacer bar między szybami */}
+            {doubleGlazing && (
+              <mesh position={[0, 0, 0]} castShadow receiveShadow>
+                {bar.type === 'v'
+                  ? <boxGeometry args={[spacerBarW, sLen, spacerDepth]} />
+                  : <boxGeometry args={[sLen, spacerBarW, spacerDepth]} />
+                }
+                <primitive object={spacerMat} attach="material" />
+              </mesh>
+            )}
           </group>
         );
       })}
@@ -920,7 +936,7 @@ function Sash({
 
       <GlassPane size={[clearWidth, clearHeight, glassD]} position={[0, glassY, glassCenterZ]} frosted={frosted} doubleGlazing={doubleGlazing} spacerColor={spacerColor} />
       <group position={[0, glassY, glassCenterZ]}>
-        <GlazingBars clearWidth={clearWidth} clearHeight={clearHeight} glassDepth={glassD} barPattern={barPattern} customBars={customBars} material={extCoreMaterial} materialInt={intCoreMaterial} />
+        <GlazingBars clearWidth={clearWidth} clearHeight={clearHeight} glassDepth={glassD} barPattern={barPattern} customBars={customBars} material={extCoreMaterial} materialInt={intCoreMaterial} doubleGlazing={doubleGlazing} spacerColor={spacerColor} />
       </group>
     </group>
   );
