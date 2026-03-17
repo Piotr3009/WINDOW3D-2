@@ -362,11 +362,6 @@ function Scene({ config }) {
         </Bounds>
       </group>
 
-      <mesh receiveShadow position={[0, -1.22, 0]}>
-        <cylinderGeometry args={[pedestalScale, pedestalScale * 1.02, 0.16, 64]} />
-        <meshStandardMaterial color="#d9d1c6" roughness={0.92} metalness={0.02} />
-      </mesh>
-
       <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.3, 0]}>
         <planeGeometry args={[20, 20]} />
         <meshStandardMaterial color="#dfd7cb" roughness={1} />
@@ -398,10 +393,8 @@ function Scene({ config }) {
 }
 
 export default function App() {
-  const [extWidth, setExtWidth] = useState(1104);
-  const [extHeight, setExtHeight] = useState(1587);
-  const width = extWidth - 104;
-  const height = extHeight - 87;
+  const [width, setWidth] = useState(1000);
+  const [height, setHeight] = useState(1500);
   const [opening, setOpening] = useState(0);
   const [upperOpening, setUpperOpening] = useState(0);
   const [autoRotate, setAutoRotate] = useState(false);
@@ -476,8 +469,8 @@ export default function App() {
 
         <div className="card">
           <h2>Size</h2>
-          <Slider label="Width (overall)" value={extWidth} min={704} max={1904} step={10} onChange={setExtWidth} />
-          <Slider label="Height (overall)" value={extHeight} min={887} max={3087} step={10} onChange={setExtHeight} />
+          <Slider label="Width" value={width} min={600} max={1800} step={10} onChange={setWidth} />
+          <Slider label="Height" value={height} min={800} max={3000} step={10} onChange={setHeight} />
           <Slider
             label="Lower sash opening"
             value={opening}
