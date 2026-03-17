@@ -306,6 +306,83 @@ function ColorPicker({ label, value, onChange, inputId }) {
   );
 }
 
+function MicrocementFloor() {
+  const { colorMap, roughnessMap } = useMemo(() => {
+    const size = 1024;
+
+    // Color map — jasny szary z subtelnym grain
+    const cCanvas = document.createElement('canvas');
+    cCanvas.width = size; cCanvas.height = size;
+    const cCtx = cCanvas.getContext('2d');
+    cCtx.fillStyle = '#cccccc';
+    cCtx.fillRect(0, 0, size, size);
+
+    // Microcement grain — losowe plamki różnej jasności
+    for (let i = 0; i < 120000; i++) {
+      const x = Math.random() * size;
+      const y = Math.random() * size;
+      const r = Math.random() * 1.8;
+      const v = Math.floor(180 + Math.random() * 50);
+      const a = Math.random() * 0.22;
+      cCtx.beginPath();
+      cCtx.arc(x, y, r, 0, Math.PI * 2);
+      cCtx.fillStyle = `rgba(${v},${v},${v},${a})`;
+      cCtx.fill();
+    }
+    // Subtelne smugi — charakterystyczne dla microcement
+    for (let i = 0; i < 150; i++) {
+      const x1 = Math.random() * size;
+      const y1 = Math.random() * size;
+      const x2 = x1 + (Math.random() - 0.5) * 200;
+      const y2 = y1 + (Math.random() - 0.5) * 200;
+      const a = Math.random() * 0.08;
+      cCtx.strokeStyle = `rgba(140,140,140,${a})`;
+      cCtx.lineWidth = Math.random() * 2;
+      cCtx.beginPath();
+      cCtx.moveTo(x1, y1);
+      cCtx.lineTo(x2, y2);
+      cCtx.stroke();
+    }
+    const colorMap = new THREE.CanvasTexture(cCanvas);
+    colorMap.wrapS = colorMap.wrapT = THREE.RepeatWrapping;
+    colorMap.repeat.set(4, 4);
+
+    // Roughness map
+    const rCanvas = document.createElement('canvas');
+    rCanvas.width = 512; rCanvas.height = 512;
+    const rCtx = rCanvas.getContext('2d');
+    rCtx.fillStyle = '#666666';
+    rCtx.fillRect(0, 0, 512, 512);
+    for (let i = 0; i < 30000; i++) {
+      const x = Math.random() * 512;
+      const y = Math.random() * 512;
+      const v = Math.floor(80 + Math.random() * 60);
+      rCtx.beginPath();
+      rCtx.arc(x, y, Math.random() * 1.5, 0, Math.PI * 2);
+      rCtx.fillStyle = `rgb(${v},${v},${v})`;
+      rCtx.fill();
+    }
+    const roughnessMap = new THREE.CanvasTexture(rCanvas);
+    roughnessMap.wrapS = roughnessMap.wrapT = THREE.RepeatWrapping;
+    roughnessMap.repeat.set(4, 4);
+
+    return { colorMap, roughnessMap };
+  }, []);
+
+  return (
+    <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.3, 0]}>
+      <planeGeometry args={[20, 20]} />
+      <meshStandardMaterial
+        map={colorMap}
+        roughnessMap={roughnessMap}
+        roughness={1.0}
+        metalness={0.0}
+        color="#c8c8c8"
+      />
+    </mesh>
+  );
+}
+
 function GradientBackground() {
   const texture = useMemo(() => {
     const size = 512;
@@ -349,10 +426,10 @@ function Scene({ config }) {
       <PerspectiveCamera makeDefault position={[0, 0.2, 4.2]} fov={32} />
 
       {/* Ambient */}
-      <ambientLight intensity={0.4 * b} />
+      <ambientLight intensity={0.7 * b} />
 
       {/* Hemisphere */}
-      <hemisphereLight args={['#fdf6e8', '#c8c0b0', 0.6 * b]} />
+      <hemisphereLight args={['#fdf6e8', '#c8c0b0', 0.9 * b]} />
 
       {/* Główne słońce */}
       <directionalLight
@@ -367,8 +444,8 @@ function Scene({ config }) {
       {/* Fill boki — symetrycznie przód i tył */}
       <directionalLight position={[-3, 2,  3]} intensity={0.6 * b} />
       <directionalLight position={[-3, 2, -3]} intensity={0.6 * b} />
-      <directionalLight position={[ 3, 2,  3]} intensity={0.4 * b} />
-      <directionalLight position={[ 3, 2, -3]} intensity={0.4 * b} />
+      <directionalLight position={[ 3, 2,  3]} intensity={0.7 * b} />
+      <directionalLight position={[ 3, 2, -3]} intensity={0.7 * b} />
 
       {/* Fill z dołu pod 45° — obydwie strony */}
       <directionalLight position={[-2, -2,  2]} intensity={0.25 * b} color="#e8d8c0" />
@@ -390,8 +467,9 @@ function Scene({ config }) {
       <pointLight position={[ 1.5, 0.5,  1.2]} intensity={0.88 * b} distance={6} decay={2} color="#fff8f0" />
       <pointLight position={[-1.5, 0.5,  1.2]} intensity={0.88 * b} distance={6} decay={2} color="#fff8f0" />
 
-      {/* Dedykowane światło na finger lift — wprost z przodu na wysokości dolnej sashki */}
-      <pointLight position={[0, -0.3, 2.0]} intensity={1.2 * b} distance={3} decay={2} color="#fff4e8" />
+      {/* Dedykowane światła na finger lift — z tyłu okna */}
+      <pointLight position={[ 0.4, -0.3, -2.0]} intensity={1.2 * b} distance={3} decay={2} color="#f0f4ff" />
+      <pointLight position={[-0.4, -0.3, -2.0]} intensity={1.2 * b} distance={3} decay={2} color="#f0f4ff" />
 
       <group position={[0, 0.18, 0]}>
         <Bounds fit margin={1.2}>
@@ -401,10 +479,7 @@ function Scene({ config }) {
         </Bounds>
       </group>
 
-      <mesh receiveShadow rotation={[-Math.PI / 2, 0, 0]} position={[0, -1.3, 0]}>
-        <planeGeometry args={[20, 20]} />
-        <meshStandardMaterial color="#d8d8d8" roughness={0.8} metalness={0.05} />
-      </mesh>
+      <MicrocementFloor />
 
       <ContactShadows position={[0, -1.215, 0]} opacity={0.55} blur={2.5} far={3.5} scale={6} />
 

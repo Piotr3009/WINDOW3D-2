@@ -203,8 +203,8 @@ function GlassPane({ size, position, frosted = false, doubleGlazing = false, spa
     <meshPhysicalMaterial
       color="#cfe3f5" roughness={0.12} metalness={0}
       transmission={0.92} transparent opacity={0.38}
-      thickness={0.028} ior={1.22} clearcoat={0.07}
-      clearcoatRoughness={0.05} reflectivity={0.15}
+      thickness={0.028} ior={1.1} clearcoat={0.03}
+      clearcoatRoughness={0.08} reflectivity={0.05}
     />
   );
 
