@@ -319,16 +319,38 @@ function Scene({ config }) {
 
       <PerspectiveCamera makeDefault position={[2.75, 1.65, 3.8]} fov={32} />
 
-      <ambientLight intensity={0.75} />
-      <hemisphereLight args={['#fff7f0', '#d8d0c5', 1.1]} />
+      {/* Ambient — delikatne, nie przepali kolorów */}
+      <ambientLight intensity={0.4} />
+
+      {/* Hemisphere — niebo ciepłe, podłoga chłodna */}
+      <hemisphereLight args={['#fdf6e8', '#c8c0b0', 0.6]} />
+
+      {/* Główne słońce — góra-prawy-przód, rzuca cienie */}
       <directionalLight
-        position={[5, 7, 6]}
-        intensity={1.8}
+        position={[4, 6, 5]}
+        intensity={1.4}
         castShadow
         shadow-mapSize-width={2048}
         shadow-mapSize-height={2048}
+        shadow-bias={-0.0001}
       />
-      <directionalLight position={[-4, 3, -3]} intensity={0.45} />
+
+      {/* Fill lewy — miękkie wypełnienie cieni */}
+      <directionalLight position={[-3, 2, 3]} intensity={0.5} />
+
+      {/* Fill tylny — oświetla tył okna i ironmongery */}
+      <directionalLight position={[0, 3, -4]} intensity={0.7} />
+
+      {/* Światło z dołu — symuluje odbicie od podłogi */}
+      <directionalLight position={[0, -2, 2]} intensity={0.2} color="#e8d8c0" />
+
+      {/* Point lights — mocny połysk na mosiądzu i metalach */}
+      <pointLight position={[0.5, 0.5, 1.2]} intensity={1.0} distance={6} decay={2} color="#fff8f0" />
+      <pointLight position={[-0.5, 0, 1.2]} intensity={0.7} distance={6} decay={2} color="#fff4e8" />
+      <pointLight position={[0.5, 0, -1.5]} intensity={1.0} distance={6} decay={2} color="#f0f4ff" />
+      <pointLight position={[-0.5, 0, -1.5]} intensity={1.0} distance={6} decay={2} color="#f0f4ff" />
+      <pointLight position={[1.5, 0.5, -1.5]} intensity={0.7} distance={6} decay={2} color="#f0f4ff" />
+      <pointLight position={[-1.5, 0.5, -1.5]} intensity={0.7} distance={6} decay={2} color="#f0f4ff" />
 
       <group position={[0, 0.18, 0]}>
         <Bounds fit margin={1.2}>

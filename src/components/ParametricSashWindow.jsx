@@ -806,9 +806,9 @@ function Sash({
   const colorE = colorExt || color;
   const colorI = colorInt || color;
 
-  const coreMaterial    = useMemo(() => new THREE.MeshPhysicalMaterial({ color: colorE, roughness: 0.46, metalness: 0.02, clearcoat: 0.24, clearcoatRoughness: 0.12 }), [colorE]);
-  const extCoreMaterial = useMemo(() => new THREE.MeshPhysicalMaterial({ color: colorE, roughness: 0.46, metalness: 0.02, clearcoat: 0.24, clearcoatRoughness: 0.12 }), [colorE]);
-  const intCoreMaterial = useMemo(() => new THREE.MeshPhysicalMaterial({ color: colorI, roughness: 0.46, metalness: 0.02, clearcoat: 0.24, clearcoatRoughness: 0.12 }), [colorI]);
+  const coreMaterial    = useMemo(() => new THREE.MeshPhysicalMaterial({ color: colorE, roughness: 0.72, metalness: 0.02, clearcoat: 0.06, clearcoatRoughness: 0.4 }), [colorE]);
+  const extCoreMaterial = useMemo(() => new THREE.MeshPhysicalMaterial({ color: colorE, roughness: 0.72, metalness: 0.02, clearcoat: 0.06, clearcoatRoughness: 0.4 }), [colorE]);
+  const intCoreMaterial = useMemo(() => new THREE.MeshPhysicalMaterial({ color: colorI, roughness: 0.72, metalness: 0.02, clearcoat: 0.06, clearcoatRoughness: 0.4 }), [colorI]);
 
   const externalBeadMaterial = useMemo(
     () =>
@@ -1553,8 +1553,8 @@ function StaffBead({ height, position, side = 'right', color = '#f0e6d3', colorI
     return g;
   }, [height]);
 
-  const staffMaterial = useMemo(() => new THREE.MeshPhysicalMaterial({ color, roughness: 0.4, metalness: 0.0, clearcoat: 0.3, clearcoatRoughness: 0.1 }), [color]);
-  const staffIntMaterial = useMemo(() => new THREE.MeshPhysicalMaterial({ color: colorInt || color, roughness: 0.4, metalness: 0.0, clearcoat: 0.3, clearcoatRoughness: 0.1 }), [colorInt, color]);
+  const staffMaterial = useMemo(() => new THREE.MeshPhysicalMaterial({ color, roughness: 0.72, metalness: 0.0, clearcoat: 0.06, clearcoatRoughness: 0.4 }), [color]);
+  const staffIntMaterial = useMemo(() => new THREE.MeshPhysicalMaterial({ color: colorInt || color, roughness: 0.72, metalness: 0.0, clearcoat: 0.06, clearcoatRoughness: 0.4 }), [colorInt, color]);
 
   return (
     <group position={position} rotation={[0, Math.PI, 0]} scale={[side === 'left' ? -1 : 1, 1, 1]}>
@@ -1644,10 +1644,10 @@ export default function ParametricSashWindow({
   const cExt = woodColorExt || woodColor;
   const cInt = woodColorInt || woodColor;
 
-  const jambMaterial    = useMemo(() => new THREE.MeshPhysicalMaterial({ color: cExt, roughness: 0.4, metalness: 0.03, clearcoat: 0.32, clearcoatRoughness: 0.11 }), [cExt]);
-  const jambIntMaterial = useMemo(() => new THREE.MeshPhysicalMaterial({ color: cInt, roughness: 0.4, metalness: 0.03, clearcoat: 0.32, clearcoatRoughness: 0.11 }), [cInt]);
-  const beadMaterial    = useMemo(() => new THREE.MeshPhysicalMaterial({ color: cExt, roughness: 0.5, metalness: 0.02, clearcoat: 0.18, clearcoatRoughness: 0.14 }), [cExt]);
-  const beadIntMaterial = useMemo(() => new THREE.MeshPhysicalMaterial({ color: cInt, roughness: 0.5, metalness: 0.02, clearcoat: 0.18, clearcoatRoughness: 0.14 }), [cInt]);
+  const jambMaterial    = useMemo(() => new THREE.MeshPhysicalMaterial({ color: cExt, roughness: 0.72, metalness: 0.02, clearcoat: 0.06, clearcoatRoughness: 0.4 }), [cExt]);
+  const jambIntMaterial = useMemo(() => new THREE.MeshPhysicalMaterial({ color: cInt, roughness: 0.72, metalness: 0.02, clearcoat: 0.06, clearcoatRoughness: 0.4 }), [cInt]);
+  const beadMaterial    = useMemo(() => new THREE.MeshPhysicalMaterial({ color: cExt, roughness: 0.72, metalness: 0.02, clearcoat: 0.06, clearcoatRoughness: 0.4 }), [cExt]);
+  const beadIntMaterial = useMemo(() => new THREE.MeshPhysicalMaterial({ color: cInt, roughness: 0.72, metalness: 0.02, clearcoat: 0.06, clearcoatRoughness: 0.4 }), [cInt]);
   const sillMaterial    = useMemo(() => new THREE.MeshPhysicalMaterial({ color: cExt, roughness: 0.42, metalness: 0.02, clearcoat: 0.22, clearcoatRoughness: 0.12, side: THREE.DoubleSide }), [cExt]);
   const sillIntMaterial = useMemo(() => new THREE.MeshPhysicalMaterial({ color: cInt, roughness: 0.42, metalness: 0.02, clearcoat: 0.22, clearcoatRoughness: 0.12, side: THREE.DoubleSide }), [cInt]);
 
